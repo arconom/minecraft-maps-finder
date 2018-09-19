@@ -6,7 +6,7 @@
 	const baseMapUrl = "/adventure-maps/";
 	const urlRegex = /(?<=href="\/adventure-maps\/)([\w\/.\-_+&#@% ]+)(?=")/g;
 	const versionRegex = /(?<=MC Version:[\s\S]+?)1\.1[23]/;
-	const ratingRegex = /id="rating[\s\S]+width:([\d.]+)/;
+	const ratingRegex = /id="rating[\s\S]+width:([789][0-9])/;
 	const getMatch = (regex, string) =>
 	{
 
@@ -94,7 +94,8 @@
 
 		fetch(baseUrl + "/" + link)
 		.then(responseHandler)
-		.then(processMapDetails);
+		.then(processMapDetails)
+		.then(data => console.log(savedLinks););
 	};
 	const getMap = response =>
 	{
