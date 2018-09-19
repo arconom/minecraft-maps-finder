@@ -34,65 +34,72 @@
 			return Promise.reject(new Error("failed to load"));
 		}
 	};
-	const processMapDetails = response =>
-	{
-		response.text()
-		.then(detail =>
-		{
-			if (!!detail)
-			{
-				let match = getMatch(versionRegex, detail);
-
-				if (!!match)
-				{
-					return Promise.resolve(detail);
-				}
-			}
-		}
-		)
-		.then(detail =>
-		{
-			if (!!detail)
-			{
-				let match = getMatch(ratingRegex, detail);
-
-				if (!!match)
-				{
-					return Promise.resolve(true);
-				}
-			}
-		}
-		);
-
-		// console.log("finding versions", responses);
-	};
 	const processMap = (link) =>
 	{
-		// localStorage.setItem("mapurls", links);
-		// console.log("links", links);
+
+		const processMapDetails = response =>
+		{
+			console.log("processMapDetails", response);
+			response.text()
+			.then(detail =>
+			{
+				if (!!detail)
+				{
+					let match = getMatch(versionRegex, detail);
+
+					if (!!match)
+					{
+						return Promise.resolve(detail);
+					}
+				}
+			}
+			)
+			.then(detail =>
+			{
+				if (!!detail)
+				{
+					let match = getMatch(ratingRegex, detail);
+
+					if (!!match)
+					{
+						console.log("map is good");
+						return Promise.resolve(true);
+					}
+				}
+			}
+			)
+			.then((open) =>
+			{
+				console.log("open", open);
+				console.log("checking if should open", link);
+				if (open)
+				{
+					console.log("opening");
+					// let linkArr = localStorage.getItem("correctversionmapurls");
+					// linkArr.push(link);
+					// localStorage.setItem("correctversionmapurls", link);
+
+					savedLinks.push(link);
+					
+					// window.open(baseUrl + "/" + link);
+				}
+			}
+			);
+		};
+
+		console.log("processMap", link);
+		// let mapArr = localStorage.getItem("mapurls");
+		// mapArr.push(link);
+		// localStorage.setItem("mapurls", mapArr);
 
 		fetch(baseUrl + "/" + link)
 		.then(responseHandler)
-		.then(processMapDetails)
-		.then((open) =>
-		{
-			if (open)
-			{
-				console.log("open this", link);
-				let linkArr = localStorage.getItem("correctversionmapurls");
-				if (!!linkArr && !!linkArr.length)
-				{
-					linkArr.push(link);
-					localStorage.setItem("correctversionmapurls", link);
-				}
-
-				window.open(baseUrl + "/" + link);
-			}
-		}
-		);
+		.then(processMapDetails);
 	};
 	const getMap = response =>
 	{
+		console.log("getMap", response);
+
 		response.text()
 		.then(responseText =>
 		{
@@ -119,10 +126,18 @@
 		);
 	};
 
-	let httpRequest;
-	let done = false;
 	NodeList.prototype.forEach = Array.prototype.forEach;
-
+let savedLinks = [];
+	// let mapUrls = localStorage.getItem("mapurls");
+	// let correctMaps = localStorage.getItem("correctversionmapurls");
+	// if (!mapUrls || !mapUrls.push)
+	// {
+	// localStorage.setItem("mapurls", []);
+	// }
+	// if (!correctMaps || !correctMaps.push)
+	// {
+	// localStorage.setItem("correctversionmapurls", []);
+	// }
 	getLinks();
 
 	function getLinks()
