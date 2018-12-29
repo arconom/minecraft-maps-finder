@@ -1,11 +1,34 @@
 // gattack("attack");
-// gattack("cast");
 // gattack("lattack");
 // gattack("rattack");
 // gattack("defend");
+var promise = new Promise(function (resolve, reject) {
+		resolve();
+	});
 
-var selectors =
-{
+var isApex = true;
+var haste = 30;
+var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay = 1000;
+var counter = 0;
+var done = false;
+var cancelMove = false;
+var pointsOfInterest = {
+	Pub: {
+		x: 150,
+		y: 145
+	},
+	Puddle: {
+		x: 140,
+		y: 190
+	},
+	Mines: {
+		x: 162,
+		y: 159
+	}
+};
+
+var selectors = {
+	actionDelay: "#s_ActionDelay",
 	actionsSelect: "select[name=\"action\"]",
 	teleportOption: "option[value=\"tele\"]",
 	actionSubmit: "#s_subbut > input[type=\"image\"]",
@@ -13,250 +36,704 @@ var selectors =
 	castButton: "#s_FightWin > img:nth-child(2)",
 	durButton: "img[onmousedown=\"level(3)\"]",
 	reviveButton: "img[onmousedown=\"revive()\"]",
-	security: "#s_Response img"
+	response: "#s_Response font",
+	security: "#s_Response img",
+	mainFrame: "frame[name=\"main\"]",
+	target: "select[name=\"target\"]",
+	other: "select[name=\"other\"]",
+	chat: "#s_Chat"
 };
-var mainFrame = document.querySelector("html > frameset > frame:nth-child(1)");
 
-var promise = new Promise(function (resolve, reject)
-	{
-		resolve();
-	}
-	);
+NodeList.prototype.forEach = Array.prototype.forEach;
+NodeList.prototype.map = Array.prototype.map;
 
-var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay = 1000, counter = 0;
-
-var cancelMove = false;
-
-//main driver
-function selectAction(delay)
-{
-	if (counter < 10)
-	{
-		setTimeout(function ()
-		{
-			if (top.ActionDelay > 0)
-			{
-				selectAction(top.ActionDelay);
-			}
-			else
-			{
-				setTimeout(function ()
-				{
-					if (document.querySelector(selectors.security))
-					{
-						alert("security");
-					}
-					//if dead revive
-					else if (document.querySelector(selectors.reviveButton))
-					{
-						setTimeout(function ()
-						{
-							promise.then(function (resolve, reject)
-							{
-								return new Promise(function (resolve, reject)
-								{
-									// console.log("reviving");
-									revive()
-									resolve();
-									selectAction(1000);
-								}
-								);
-							}
-							);
-						}, reviveDelay);
-					}
-					//if level up buttons
-					else if (document.querySelector(selectors.durButton))
-					{
-						promise.then(function (resolve, reject)
-						{
-							return new Promise(function (resolve, reject)
-							{
-
-								// console.log("leveling up");
-								level(3);
-								counter++;
-								resolve();
-								selectAction(standardDelay);
-							}
-							);
-						}
-						);
-					}
-					else if (document.querySelector(selectors.castButton))
-					{
-						promise.then(function (resolve, reject)
-						{
-							return new Promise(function (resolve, reject)
-							{
-								// console.log("attacking");
-								gattack("cast");
-								resolve();
-								selectAction(standardDelay);
-							}
-							);
-						}
-						);
-					}
-					else if (document.querySelector(selectors.actionSubmit))
-					{
-						promise.then(function (resolve, reject)
-						{
-							return new Promise(function (resolve, reject)
-							{
-								// console.log("new fight");
-								document.querySelector(selectors.actionSubmit).click();
-								resolve();
-								selectAction(newFightDelay);
-							}
-							);
-						}
-						);
-					}
-					else
-					{}
-				}, Math.max(delay, top.ActionDelay * 2));
-			}
-		}, 1000);
-	}
-	else
-	{
-		alert("done");
-	}
+function getDelay(value) {
+	let returnMe = value;
+	returnMe *= isApex ? 2 : 1;
+	returnMe *= 1 - (haste / 200);
+	return returnMe;
 }
 
-function move(x, y)
-{
-	console.log("move", x, y);
-	var ntl = parseInt(document.querySelector("#s_Ntl").textContent),
-	limit = Math.sqrt(ntl / 100);
-	var loc = scrapeLocation();
-
-	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove)
-	{
-		promise.then(function (resolve, reject)
-		{
-			return new Promise(function (resolve, reject)
-			{
-				console.log("move loop", loc.x, loc.y);
-
-				document.querySelector("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(5)").value = x;
-				document.querySelector("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(7)").value = y;
-				document.querySelector(selectors.actionSelect).value = "tele";
-				updateaction("tele", document.getElementById('general'));
-				document.querySelector(selectors.actionSubmit).click();
-
-				setTimeout(function ()
-				{
-					resolve();
-				}, 6000);
-			}
-			);
-		}
-		);
-	}
-}
-
-function calculateWarpPoint(limit, start, end)
-{
-	console.log("calculateWarpPoint", limit, start, end);
-
-	var counter = 0;
-	var returnMe = start;
-	while ((limit > calculateManhattanDistance(start, returnMe))
-		 && ((returnMe.x !== end.x) || (returnMe.y !== end.y)))
-	{
-		var steve = getVector(returnMe.x, end.x);
-		returnMe.x += getVector(returnMe.x, end.x);
-
-		if (limit > calculateManhattanDistance(start, returnMe))
-		{
-			returnMe.y += getVector(returnMe.y, end.y);
-		}
-		counter++;
+function getChat() {
+	var returnMe = document.querySelector(selectors.chat);
+	if (!returnMe) {
+		returnMe = getMainFrameElement(selectors.chat);
 	}
 	return returnMe;
 }
 
-function calculateNtlCost(distance)
-{
+function getChatText() {
+	var returnMe = [];
+	getChat().querySelectorAll("font").forEach(x => {
+		returnMe.push(x.textContent);
+	});
+	return returnMe;
+}
+
+function selectOptionByText(selector, text) {
+	var select = document.querySelector(selector);
+	if (!select) {
+		select = getMainFrameElement(selector);
+	}
+
+	select.value = getOptionValueByText(selector, text);
+
+	if ("createEvent" in document) {
+		var evt = document.createEvent("HTMLEvents");
+		evt.initEvent("change", false, true);
+		select.dispatchEvent(evt);
+	} else {
+		select.fireEvent("onchange");
+	}
+
+}
+
+function getOptionValueByText(selector, text) {
+	var returnMe = null;
+	var select = document.querySelector(selector);
+	if (!select) {
+		select = getMainFrameElement(selector);
+	}
+	var options = select.querySelectorAll("option");
+
+	for (let i = 0; i < options.length; i++) {
+		if (options[i].textContent.indexOf(text) > -1) {
+			returnMe = options[i].value;
+			break;
+		}
+	}
+	if (!returnMe) {
+		console.log(select, text);
+		throw ("option not found");
+	}
+	return returnMe;
+}
+
+function isBeastActive(text) {
+
+	if (!text) {
+		text = getChatText().join(" ");
+	}
+
+	var awakePattern = /.w.kene?d?[\w ]+beast/;
+	var deadPattern = /killed[\w ]+beast/;
+
+	var awakeIndex = text.match(awakePattern);
+	var deadIndex = text.match(deadPattern);
+
+	awakeIndex = awakeIndex ? awakeIndex.index : -1;
+	deadIndex = deadIndex ? deadIndex.index : -1;
+
+	return awakeIndex > -1
+	 ? deadIndex.index == -1
+	 : deadIndex.index > awakeIndex.index;
+}
+
+function isInventoryFull() {
+	return Inventory.match(/-/g).length >= 50;
+}
+
+function wantItem(text) {
+
+	if (!text) {
+		text = getChatText().join(" ");
+	}
+
+	var found = false;
+
+	var wantThese = [
+		"Believer",
+		"Cara",
+		"Spike",
+		"Decay",
+		"Vice",
+		"Apex",
+		"Scorn",
+		"Revenge",
+		"Melee",
+		"Devil"
+	];
+
+	wantThese.forEach(x => {
+		if (text.indexOf(x) > -1) {
+			found = true;
+		}
+	});
+
+	return found;
+}
+
+function getBeastPosition(text) {
+	if (!text) {
+		text = getChatText().join(" ");
+	}
+	var awakePattern = /.w.kene?d?[\w ]+beast[a-zA-Z ]+(\d+),\w+,(\d+)/;
+
+	var match = text.match(awakePattern);
+	return {
+		x: match[1],
+		y: match[2]
+	};
+}
+
+function getNextUnwantedItem() {
+	var select = document.querySelector(selectors.target);
+	if (!select) {
+		select = getMainFrameElement(selectors.target);
+	}
+	var options = select.querySelectorAll("option");
+
+	for (let i = 0; i < options.length; i++) {
+		var isEquipped = options[i].textContent.match(/EQUIPPED/) !== null;
+		var isDivider = options[i].textContent.match(/_/) !== null;
+		var wanted = wantItem(options[i].textContent);
+
+		if (!isEquipped && !wanted && !isDivider) {
+			return options[i].textContent;
+		}
+	}
+
+	return null;
+}
+
+function setTarget(text) {
+	selectOptionByText(selectors.target, text);
+	// updatetarget(g.action.value, this.options[this.selectedIndex].value, g);
+}
+
+function setAction(text) {
+	selectOptionByText(selectors.actionsSelect, text);
+	// parent.frames[0].window.updateaction(this.options[this.selectedIndex].value,document.getElementById('general'));
+}
+
+function setOther(text) {
+	selectOptionByText(selectors.other, text);
+}
+
+function clickActionSubmit() {
+	clickMainFrameElement(selectors.actionSubmit);
+}
+
+function clickDur() {
+	parent.frames[0].window.level(3);
+	// clickMainFrameElement(selectors.durButton);
+}
+
+function clickCast() {
+	parent.frames[0].window.gattack("cast")
+	// clickMainFrameElement(selectors.castButton);
+}
+
+function clickRevive() {
+	parent.frames[0].window.revive();
+	// clickMainFrameElement(selectors.reviveButton);
+}
+
+function clickMainFrameElement(selector) {
+	getMainFrameElement(selector).click();
+}
+
+function getMainFrameElement(selector) {
+	return getMainFrame().querySelector(selector);
+}
+
+function isMainFrameElementPresent(selector) {
+	return !!getMainFrame().querySelector(selector);
+}
+
+function getMainFrame() {
+	let mainFrame = document.querySelector(selectors.mainFrame);
+	if (!mainFrame) {
+		mainFrame = window.parent.document.querySelector(selectors.mainFrame);
+	}
+	if (!mainFrame) {
+		throw ("cant find main frame");
+	}
+	mainFrame = mainFrame.contentWindow.document ? mainFrame.contentWindow.document : mainFrame.contentDocument;
+	return mainFrame;
+}
+
+function revive() {
+	console.log("revive");
+	return new Promise(function (resolve, reject) {
+		// console.log("reviving");
+		clickRevive();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(standardDelay / 2));
+		// resolve();
+		// setupGrindLoop(1000));
+	});
+}
+
+function train() {
+	console.log("train");
+	return new Promise(function (resolve, reject) {
+
+		// console.log("leveling up");
+		clickDur();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(standardDelay / 2));
+		// resolve();
+		// setupGrindLoop(standardDelay));
+	});
+}
+
+function beastHandler() {
+	console.log("beastHandler");
+	return new Promise(function (resolve, reject) {
+		var p = getBeastPosition();
+		warpToBeast();
+		setTimeout(function () {
+			move(p.x, p.y);
+		}, standardDelay);
+
+		setTimeout(function () {
+			setAction("Battle");
+			setTarget("Beast");
+			setTimeout(function () {
+				resolve();
+			}, getDelay(standardDelay / 2));
+			// resolve();
+			// setupGrindLoop(standardDelay));
+		}, standardDelay);
+	});
+}
+
+function destroyItem(name) {
+	return new Promise(function (resolve, reject) {
+		setAction("DESTROY");
+		setTarget(getNextUnwantedItem());
+		act();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(newFightDelay));
+	});
+}
+
+function cast() {
+	return new Promise(function (resolve, reject) {
+		clickCast();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(rapidDelay / 2));
+	});
+}
+
+function act() {
+	return new Promise(function (resolve, reject) {
+		clickActionSubmit();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(newFightDelay));
+	});
+}
+
+function newFight() {
+	return new Promise(function (resolve, reject) {
+		setAction("New Fight");
+		setTarget(getMainFrameElement("#selectMonster").value);
+		clickActionSubmit();
+		setTimeout(function () {
+			resolve();
+		}, getDelay(newFightDelay));
+	});
+}
+
+function craft(type, item) {
+	console.log("craft", item);
+	return new Promise(function (resolve, reject) {
+		var selectCraftable = getMainFrameElement("#selectCraftable");
+		setAction("Craft");
+		setTimeout(function () {
+			setTarget(type);
+			setTimeout(function () {
+				setOther(item);
+				act();
+				setTimeout(function () {
+					if (isTrivial()) {
+						selectCraftable.selectedIndex += 1;
+					}
+					if (craftingFailed()) {
+						reject();
+					} else {
+						resolve();
+					}
+				}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length));
+			}, 300);
+		}, 1000);
+	});
+}
+
+function sell(item) {
+	console.log("sell");
+	return new Promise(function (resolve, reject) {
+		setAction("Sell");
+		setTarget(item);
+		act();
+		setTimeout(function () {
+			resolve();
+		}, newFightDelay * 2);
+	});
+}
+
+function isTrivial(text) {
+	var chatText = getChatText();
+	if (!text) {
+		text = chatText[0] + chatText[1];
+	}
+	var pattern = /trivial/;
+	var index = text.match(pattern);
+	index = index ? index.index : -1;
+	return index > -1
+}
+
+function craftingFailed() {
+
+	var text = getMainFrameElement(selectors.response).textContent;
+	var pattern = /failed/;
+	var index = text.match(pattern);
+	index = index ? index.index : -1;
+	return index > -1
+}
+
+function craftAndSell() {
+	let type = getMainFrameElement("#selectCraftType").value;
+	let item = getMainFrameElement("#selectCraftable").value;
+	return craft(type, item).then(function () {
+		return new Promise(function (resolve, reject) {
+			return sell(item).then(function () {
+				resolve();
+			});
+		});
+	});
+}
+
+function setupGrindLoop() {
+	setupLoop(grind);
+}
+
+function setupCraftLoop() {
+	setupLoop(craftAndSell);
+}
+
+function setupLoop(callback) {
+	setTimeout(function () {
+		checkInterrupts(callback)()
+		.then(function () {
+			if (!done) {
+				setupLoop(callback);
+			}
+		}, function () {
+			if (!done) {
+				setupLoop(callback);
+			}
+		});
+	}, getDelayValue());
+}
+
+function getDelayValue() {
+	var returnMe =
+		DisBar
+		 ? 0
+		 : top.ActionDelay;
+
+	return returnMe;
+}
+
+function grind() {
+	if (isInventoryFull()) {
+		return destroyItem();
+	} else if (isMainFrameElementPresent(selectors.castButton)) {
+		return cast();
+	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
+		return newFight();
+	} else {
+		return promise.then(function () {
+			return new Promise(function (resolve, reject) {
+				resolve();
+			});
+		});
+	}
+}
+
+function checkInterrupts(callback) {
+	if (isMainFrameElementPresent(selectors.security)) {
+		done = true;
+		alert("security");
+	}
+	//if dead revive
+	else if (isMainFrameElementPresent(selectors.reviveButton)) {
+
+		return function () {
+			setTimeout(function () {
+				return revive();
+			}, reviveDelay);
+		}
+	}
+	//if level up buttons
+	else if (isMainFrameElementPresent(selectors.durButton)) {
+		return train;
+	} else if (isBeastActive()) {
+		done = true;
+		return beastHandler;
+	} else {
+		return callback;
+		// } else if (isMainFrameElementPresent(selectors.actionSubmit)) {
+		// return act();
+	}
+	// else {
+	// return promise.then(function () {
+	// return new Promise(function (resolve, reject) {
+	// resolve();
+	// });
+	// });
+	// }
+}
+
+function warpToBeast() {
+	var sf = top.frames.main.document.getElementById("skipform");
+	sf.action.value = "chat";
+	sf.target.value = "/bnb";
+	sf.other.value = 0;
+	pollzero(sf, 0, true);
+}
+
+function move(x, y) {
+	x = parseInt(x);
+	y = parseInt(y);
+	console.log("move", x, y);
+	// var ntl = parseInt(document.querySelector("#s_Ntl").textContent),
+	var limit = Math.floor(Math.sqrt(parseInt(Ntl) / 100)) - 1;
+	if (isNaN(limit)) {
+		throw ("no nan");
+	}
+	var loc = scrapeLocation();
+
+	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
+		promise.then(function (resolve, reject) {
+			return new Promise(function (resolve, reject) {
+				console.log("move loop", loc.x, loc.y);
+
+				var point = calculateWarpPoint(limit, loc, {
+						x: x,
+						y: y
+					});
+
+				console.log("moving to ", point);
+
+				getMainFrameElement(selectors.actionsSelect).value = "tele";
+				parent.frames[0].window.updateaction("tele", getMainFrameElement('#general'));
+				setTimeout(function () {
+
+					getMainFrameElement(selectors.target).value = point.x;
+					getMainFrameElement(selectors.other).value = point.y;
+					// document.querySelector("select[name=\"target\"]").value = x;
+					// document.querySelector("select[name=\"other\"]").value = y;
+					getMainFrameElement(selectors.actionSubmit).click();
+
+					setTimeout(function () {
+						resolve();
+						move(x, y);
+					}, 6000);
+
+				}, 300);
+			});
+		});
+	}
+}
+
+function calculateWarpPoint(limit, start, end) {
+	console.log("calculateWarpPoint", limit, start, end);
+
+	var d = calculateManhattanDistance(start, end);
+	return {
+		x: Math.floor(lerp(start.x, end.x, constrain(limit / d, 0, 1))),
+		y: Math.floor(lerp(start.y, end.y, constrain(limit / d, 0, 1)))
+	};
+
+}
+
+function constrain(value, min, max) {
+	return value > max ? max : value < min ? min : value;
+}
+
+function calculateNtlCost(distance) {
 	console.log("calculateNtlCost", distance);
 	return distance * distance * 100;
 }
 
-function calculateManhattanDistance(a, b)
-{
-	console.log("calculateManhattanDistance", a, b);
+function calculateManhattanDistance(a, b) {
+	// console.log("calculateManhattanDistance", a, b);
 	return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-function scrapeLocation()
-{
-	console.log("scrapeLocation");
-	var loc = document.querySelector("#s_Loc").textContent.split(",");
-	var returnMe =
-	{
-		x: loc[0],
-		y: loc[2]
+function scrapeLocation() {
+	// console.log("scrapeLocation");
+	// var loc = document.querySelector("#s_Loc").textContent.split(",");
+	var returnMe = {
+		x: parseInt(window.LocX),
+		y: parseInt(window.LocY)
 	};
 	return returnMe;
 }
 
-function getVector(a, b)
-{
-	console.log("getVector", a, b);
+function getVector(a, b) {
+	// console.log("getVector", a, b);
 	return a > b ? -1 :
 	a < b ? 1 :
 	0;
 }
 
-function moveHandler()
-{
+function lerp(v0, v1, t) {
+	return v0 * (1 - t) + v1 * t
+}
+
+function moveHandler() {
+	cancelMove = false;
 	var x = prompt("enter target x");
 	var y = prompt("enter target y");
-	counter = 10;
 	move(x, y);
 	this.onclick = cancelMoveHandler;
 	this.textContent = "cancel Move";
 }
-function cancelMoveHandler()
-{
+
+function cancelMoveHandler() {
 	cancelMove = true;
 	this.onclick = moveHandler;
 	this.textContent = "move";
 }
 
-(function ()
-{
-
-	var startButton = document.createElement("button");
-	var stopButton = document.createElement("button");
-	var copyButton = document.createElement("button");
-	var moveButton = document.createElement("button");
-
-	startButton.onclick = function ()
-	{
-		counter = 0;
-		selectAction(0);
-	};
-	startButton.textContent = "Start";
-	stopButton.onclick = function ()
-	{
-		counter = 10;
-	};
-	stopButton.textContent = "Stop";
-	copyButton.onclick = function ()
-	{
-		counter = 10;
-		console.log(document.body.outerHTML);
-	};
-	copyButton.textContent = "copy";
-	moveButton.onclick = moveHandler;
-	moveButton.textContent = "move";
-
-	document.querySelector("center").appendChild(startButton);
-	document.querySelector("center").appendChild(stopButton);
-	document.querySelector("center").appendChild(copyButton);
-	document.querySelector("center").appendChild(moveButton);
+function logBody() {
+	console.log(document.body.outerHTML);
 }
-)();
+function stopGrindingHandler() {
+	done = true;
+	this.onclick = startGrindingHandler;
+	this.textContent = "Grind";
+}
+function startGrindingHandler() {
+	done = false;
+	this.onclick = stopGrindingHandler;
+	this.textContent = "Stop Grinding";
+	// setAction("New Fight");
+	// setTarget(getMainFrameElement("#selectMonster").value);
+	setupGrindLoop();
+}
+
+function stopCraftingHandler() {
+	done = true;
+	this.textContent = "Craft";
+	this.onclick = startCraftingHandler;
+}
+
+function startCraftingHandler() {
+	done = false;
+	this.textContent = "Stop Crafting";
+	this.onclick = stopCraftingHandler;
+	setupCraftLoop();
+}
+
+function createButton(id, text, handler) {
+	let returnMe = document.createElement("button");
+	returnMe.id = id;
+	returnMe.textContent = text;
+	returnMe.onclick = handler;
+	return returnMe;
+}
+function createGrindButton() {
+	return createButton("btnGrind", "Grind", startGrindingHandler);
+}
+function createCraftButton() {
+	return createButton("btnCraft", "Craft", startCraftingHandler);
+}
+function createMoveButton() {
+	return createButton("btnMove", "Move", moveHandler);
+}
+function createWeaponSelect() {
+	return createSelect("selectWeapon", window.frames[0].window.top.weapons);
+}
+
+function createArmourSelect() {
+	return createSelect("selectArmour", window.frames[0].window.top.multi);
+}
+
+function createRelicSelect() {
+	return createSelect("selectRelic", window.frames[0].window.top.relics);
+}
+
+function createCraftTypeSelect() {
+	var returnMe = createSelect("selectCraftType", [
+				"Weapon", "Helmet", "Shield", "Gauntlets", "Mantle", "Sleeves", "Damage Spell", "Leggings", "Boots", "Heal Spell", "Relic", "Bow", "Arrow", "Light Weapons", "Heavy Weapons", "Precise Weapons", "Rapid Damage Spells", "Major Damage Spells", "Accurate Damage Spells", "Durability Helmets", "Durability Shields", "Durability Gauntlets", "Durability Mantles", "Durability Sleeves", "Durability Leggings", "Durability Boots", "Essence Elements"
+			]);
+	returnMe.onchange = function () {
+		setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(this.value));
+	};
+	return returnMe;
+}
+
+function getCraftTypeList(type) {
+	return type.indexOf("Weapon") > -1
+	 ? window.frames[0].window.top.weapons
+	 : type.indexOf("Damage") > -1
+	 ? window.frames[0].window.top.hurts
+	 : type.indexOf("Heal") > -1
+	 ? window.frames[0].window.top.heals
+	 : type.indexOf("Relic") > -1
+	 ? window.frames[0].window.top.relics
+	 : type.indexOf("Element") > -1
+	 ? window.frames[0].window.top.elements
+	 : window.frames[0].window.top.multi;
+}
+
+function setOptions(select, options) {
+	select.options.length = 0;
+
+	options.forEach(x => {
+		let option = document.createElement("option");
+		option.value = x;
+		option.textContent = x;
+		select.add(option);
+	});
+
+	// return select;
+}
+
+function createCraftSelect() {
+	return createSelect("selectCraftable", []);
+}
+
+function createMonsterSelect() {
+	return createSelect("selectMonster", window.frames[0].window.top.clista);
+}
+
+function createSelect(id, options) {
+	let returnMe = document.createElement("select");
+	returnMe.id = id;
+
+	setOptions(returnMe, options);
+
+	return returnMe;
+}
+
+(function () {
+	var center = getMainFrame().querySelector("center");
+	var div = document.createElement("div");
+
+	center.insertAdjacentElement("afterend", div);
+
+	div.appendChild(createGrindButton());
+	div.appendChild(createMonsterSelect());
+	div.appendChild(createCraftButton());
+	div.appendChild(createCraftTypeSelect());
+	div.appendChild(createCraftSelect());
+	div.appendChild(createMoveButton());
+
+	center.style.display = "none";
+
+	setTarget("Sheaf");
+	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
+	selectOptionByText("#selectCraftable", "Rusty Dagger")
+	getMainFrameElement(selectors.actionDelay).style = "display: none";
+})();
