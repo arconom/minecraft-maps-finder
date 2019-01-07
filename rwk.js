@@ -401,6 +401,24 @@ function logBody() {
 	console.log(document.body.outerHTML);
 }
 
+
+/* function grind() {
+	if (isInventoryFull()) {
+		return destroyItem();
+	} else if (isMainFrameElementPresent(selectors.castButton)) {
+		return cast();
+	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
+		return newFight();
+	} else {
+		return promise.then(function () {
+			return new Promise(function (resolve, reject) {
+				resolve();
+			});
+		});
+	}
+}
+ */
+
 //promise loops
 function craftAndSell() {
 	var type = getMainFrameElement("#selectCraftType").value;
@@ -415,7 +433,7 @@ function craftAndSell() {
 }
 
 function setupGrindLoop() {
-	setupLoop(grind);
+	setupLoop(newFight);
 }
 
 function setupCraftLoop() {
