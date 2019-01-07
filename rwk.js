@@ -102,9 +102,10 @@ function isBeastActive(text) {
 		deadIndex = slainIndex;
 	}
 
-	return awakeIndex > -1
-	 ? deadIndex.index == -1
-	 : deadIndex.index > awakeIndex.index;
+	return
+	(awakeIndex > -1)
+	 && ((deadIndex.index == -1)
+		 || (deadIndex.index > awakeIndex.index));
 }
 
 function isInventoryFull() {
@@ -115,7 +116,7 @@ function getBeastPosition(text) {
 	if (!text) {
 		text = getChatText().join(" ");
 	}
-	var awakePattern = /.w.kene?d?[\w ]+beast[a-zA-Z ]+(\d+),\w+,(\d+)/;
+	var awakePattern = /awoken[\w ]+beast[a-zA-Z ]+(\d+),\w+,(\d+)/;
 
 	var match = text.match(awakePattern);
 	return {
@@ -179,7 +180,11 @@ function getMainFrame() {
 	if (!mainFrame) {
 		throw ("cant find main frame");
 	}
-	mainFrame = mainFrame.contentWindow.document ? mainFrame.contentWindow.document : mainFrame.contentDocument;
+	if (mainFrame.contentWindow.document) {
+		mainFrame = mainFrame.contentWindow.document;
+	} else {
+		mainFrame = mainFrame.contentDocument;
+	}
 	return mainFrame;
 }
 
@@ -226,7 +231,7 @@ function getOptionValueByText(selector, text) {
 function revive() {
 	return new Promise(function (resolve, reject) {
 		clickRevive();
-		
+
 		setTimeout(function () {
 			resolve();
 		}, getDelay(standardDelay / 2));
@@ -429,7 +434,7 @@ function setupLoop(callback) {
 				setupLoop(callback);
 			}
 		});
-	}, getDelayValue());
+	}, getLoopDelayValue());
 }
 
 //logic branching
@@ -536,22 +541,25 @@ function calculateWarpPoint(limit, start, end) {
 }
 
 function constrain(value, min, max) {
-	return value > max ? max : value < min ? min : value;
+	var returnMe;
+	if (value > max) {
+		returnMe = max;
+	} else if (value < min) {
+		returnMe = min;
+	}
+
+	return returnMe;
 }
 
 function calculateNtlCost(distance) {
-	console.log("calculateNtlCost", distance);
 	return distance * distance * 100;
 }
 
 function calculateManhattanDistance(a, b) {
-	// console.log("calculateManhattanDistance", a, b);
 	return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
 function scrapeLocation() {
-	// console.log("scrapeLocation");
-	// var loc = document.querySelector("#s_Loc").textContent.split(",");
 	var returnMe = {
 		x: parseInt(window.LocX),
 		y: parseInt(window.LocY)
@@ -560,10 +568,15 @@ function scrapeLocation() {
 }
 
 function getVector(a, b) {
-	// console.log("getVector", a, b);
-	return a > b ? -1 :
-	a < b ? 1 :
-	0;
+	var returnMe;
+	if (a > b) {
+		returnMe = -1;
+	} else if (a < b) {
+		returnMe = 1;
+	} else {
+		returnMe = 0;
+	}
+	return returnMe;
 }
 
 function lerp(v0, v1, t) {
@@ -571,18 +584,22 @@ function lerp(v0, v1, t) {
 }
 
 //delay handler
-function getDelayValue() {
-	var returnMe =
-		DisBar
-		 ? 0
-		 : top.ActionDelay;
+function getLoopDelayValue() {
+	var returnMe;
 
+	if (DisBar) {
+		returnMe = 0;
+	} else {
+		returnMe = top.ActionDelay;
+	}
 	return returnMe;
 }
 
 function getDelay(value) {
 	var returnMe = value;
-	returnMe *= isApex ? 2 : 1;
+	if (isApex) {
+		returnMe *= 2;
+	}
 	returnMe *= 1 - (haste / 200);
 	return returnMe;
 }
@@ -674,17 +691,21 @@ function createCraftTypeSelect() {
 }
 
 function getCraftTypeList(type) {
-	return type.indexOf("Weapon") > -1
-	 ? window.frames[0].window.top.weapons
-	 : type.indexOf("Damage") > -1
-	 ? window.frames[0].window.top.hurts
-	 : type.indexOf("Heal") > -1
-	 ? window.frames[0].window.top.heals
-	 : type.indexOf("Relic") > -1
-	 ? window.frames[0].window.top.relics
-	 : type.indexOf("Element") > -1
-	 ? window.frames[0].window.top.elements
-	 : window.frames[0].window.top.multi;
+	var returnMe;
+	if (type.indexOf("Weapon") > -1) {
+		returnMe = window.frames[0].window.top.weapons
+	} else if (type.indexOf("Damage") > -1) {
+		returnMe = window.frames[0].window.top.hurts
+	} else if (type.indexOf("Heal") > -1) {
+		returnMe = window.frames[0].window.top.heals
+	} else if (type.indexOf("Relic") > -1) {
+		returnMe = window.frames[0].window.top.relics
+	} else if (type.indexOf("Element") > -1) {
+		returnMe = window.frames[0].window.top.elements
+	} else {
+		returnMe = window.frames[0].window.top.multi
+	}
+	return returnMe;
 }
 
 function setOptions(select, options) {
