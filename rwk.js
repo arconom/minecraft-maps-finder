@@ -47,11 +47,25 @@ var selectors = {
 NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
-function getDelay(value) {
-	let returnMe = value;
-	returnMe *= isApex ? 2 : 1;
-	returnMe *= 1 - (haste / 200);
-	return returnMe;
+//state observers
+function getRWKState() {
+	return {
+		isReviveNeeded: isMainFrameElementPresent(selectors.reviveButton),
+		isBeastActive: isBeastActive(),
+		isTrainingNeeded: isMainFrameElementPresent(selectors.durButton),
+		isTreasuryFull: false,
+		isKingdomOwnedByMe: false,
+		isWalletFull: false,
+		isTimedOut: false,
+		isInventoryFull: isInventoryFull(),
+		isSecurityResponseNeeded: isMainFrameElementPresent(selectors.security)
+	};
+}
+
+function getResponseMessage() {
+	return getMainFrameElement(selectors.response)
+	.textContent;
+
 }
 
 function getChat() {
@@ -64,48 +78,9 @@ function getChat() {
 
 function getChatText() {
 	var returnMe = [];
-	getChat().querySelectorAll("font").forEach(x => {
+	getChat().querySelectorAll("font").forEach(function (x) {
 		returnMe.push(x.textContent);
 	});
-	return returnMe;
-}
-
-function selectOptionByText(selector, text) {
-	var select = document.querySelector(selector);
-	if (!select) {
-		select = getMainFrameElement(selector);
-	}
-
-	select.value = getOptionValueByText(selector, text);
-
-	if ("createEvent" in document) {
-		var evt = document.createEvent("HTMLEvents");
-		evt.initEvent("change", false, true);
-		select.dispatchEvent(evt);
-	} else {
-		select.fireEvent("onchange");
-	}
-
-}
-
-function getOptionValueByText(selector, text) {
-	var returnMe = null;
-	var select = document.querySelector(selector);
-	if (!select) {
-		select = getMainFrameElement(selector);
-	}
-	var options = select.querySelectorAll("option");
-
-	for (let i = 0; i < options.length; i++) {
-		if (options[i].textContent.indexOf(text) > -1) {
-			returnMe = options[i].value;
-			break;
-		}
-	}
-	if (!returnMe) {
-		console.log(select, text);
-		throw ("option not found");
-	}
 	return returnMe;
 }
 
@@ -115,14 +90,17 @@ function isBeastActive(text) {
 		text = getChatText().join(" ");
 	}
 
-	var awakePattern = /.w.kene?d?[\w ]+beast/;
-	var deadPattern = /killed[\w ]+beast/;
+	var awakeIndex = text.indexOf("awoken");
+	var killedIndex = text.indexOf("killed");
+	var slainIndex = text.indexOf("slain");
+	var deadIndex = -1;
 
-	var awakeIndex = text.match(awakePattern);
-	var deadIndex = text.match(deadPattern);
-
-	awakeIndex = awakeIndex ? awakeIndex.index : -1;
-	deadIndex = deadIndex ? deadIndex.index : -1;
+	if (killedIndex > -1) {
+		deadIndex = killedIndex;
+	}
+	if (slainIndex > -1) {
+		deadIndex = slainIndex;
+	}
 
 	return awakeIndex > -1
 	 ? deadIndex.index == -1
@@ -131,36 +109,6 @@ function isBeastActive(text) {
 
 function isInventoryFull() {
 	return Inventory.match(/-/g).length >= 50;
-}
-
-function wantItem(text) {
-
-	if (!text) {
-		text = getChatText().join(" ");
-	}
-
-	var found = false;
-
-	var wantThese = [
-		"Believer",
-		"Cara",
-		"Spike",
-		"Decay",
-		"Vice",
-		"Apex",
-		"Scorn",
-		"Revenge",
-		"Melee",
-		"Devil"
-	];
-
-	wantThese.forEach(x => {
-		if (text.indexOf(x) > -1) {
-			found = true;
-		}
-	});
-
-	return found;
 }
 
 function getBeastPosition(text) {
@@ -176,25 +124,7 @@ function getBeastPosition(text) {
 	};
 }
 
-function getNextUnwantedItem() {
-	var select = document.querySelector(selectors.target);
-	if (!select) {
-		select = getMainFrameElement(selectors.target);
-	}
-	var options = select.querySelectorAll("option");
-
-	for (let i = 0; i < options.length; i++) {
-		var isEquipped = options[i].textContent.match(/EQUIPPED/) !== null;
-		var isDivider = options[i].textContent.match(/_/) !== null;
-		var wanted = wantItem(options[i].textContent);
-
-		if (!isEquipped && !wanted && !isDivider) {
-			return options[i].textContent;
-		}
-	}
-
-	return null;
-}
+//page object
 
 function setTarget(text) {
 	selectOptionByText(selectors.target, text);
@@ -242,7 +172,7 @@ function isMainFrameElementPresent(selector) {
 }
 
 function getMainFrame() {
-	let mainFrame = document.querySelector(selectors.mainFrame);
+	var mainFrame = document.querySelector(selectors.mainFrame);
 	if (!mainFrame) {
 		mainFrame = window.parent.document.querySelector(selectors.mainFrame);
 	}
@@ -253,51 +183,62 @@ function getMainFrame() {
 	return mainFrame;
 }
 
+function selectOptionByText(selector, text) {
+	var select = document.querySelector(selector);
+	if (!select) {
+		select = getMainFrameElement(selector);
+	}
+
+	select.value = getOptionValueByText(selector, text);
+
+	if ("createEvent" in document) {
+		var evt = document.createEvent("HTMLEvents");
+		evt.initEvent("change", false, true);
+		select.dispatchEvent(evt);
+	} else {
+		select.fireEvent("onchange");
+	}
+
+}
+
+function getOptionValueByText(selector, text) {
+	var returnMe = null;
+	var select = document.querySelector(selector);
+	if (!select) {
+		select = getMainFrameElement(selector);
+	}
+	var options = select.querySelectorAll("option");
+
+	for (var i = 0; i < options.length; i++) {
+		if (options[i].textContent.indexOf(text) > -1) {
+			returnMe = options[i].value;
+			break;
+		}
+	}
+	if (!returnMe) {
+		console.log(select, text);
+		throw ("option not found");
+	}
+	return returnMe;
+}
+
+//actions
 function revive() {
-	console.log("revive");
 	return new Promise(function (resolve, reject) {
-		// console.log("reviving");
 		clickRevive();
+		
 		setTimeout(function () {
 			resolve();
 		}, getDelay(standardDelay / 2));
-		// resolve();
-		// setupGrindLoop(1000));
 	});
 }
 
 function train() {
-	console.log("train");
 	return new Promise(function (resolve, reject) {
-
-		// console.log("leveling up");
 		clickDur();
 		setTimeout(function () {
 			resolve();
 		}, getDelay(standardDelay / 2));
-		// resolve();
-		// setupGrindLoop(standardDelay));
-	});
-}
-
-function beastHandler() {
-	console.log("beastHandler");
-	return new Promise(function (resolve, reject) {
-		var p = getBeastPosition();
-		warpToBeast();
-		setTimeout(function () {
-			move(p.x, p.y);
-		}, standardDelay);
-
-		setTimeout(function () {
-			setAction("Battle");
-			setTarget("Beast");
-			setTimeout(function () {
-				resolve();
-			}, getDelay(standardDelay / 2));
-			// resolve();
-			// setupGrindLoop(standardDelay));
-		}, standardDelay);
 	});
 }
 
@@ -378,126 +319,25 @@ function sell(item) {
 	});
 }
 
-function isTrivial(text) {
-	var chatText = getChatText();
-	if (!text) {
-		text = chatText[0] + chatText[1];
-	}
-	var pattern = /trivial/;
-	var index = text.match(pattern);
-	index = index ? index.index : -1;
-	return index > -1
-}
+function beastHandler() {
+	console.log("beastHandler");
+	return new Promise(function (resolve, reject) {
+		var p = getBeastPosition();
+		warpToBeast();
+		setTimeout(function () {
+			move(p.x, p.y);
+		}, standardDelay);
 
-function craftingFailed() {
-
-	var text = getMainFrameElement(selectors.response).textContent;
-	var pattern = /failed/;
-	var index = text.match(pattern);
-	index = index ? index.index : -1;
-	return index > -1
-}
-
-function craftAndSell() {
-	let type = getMainFrameElement("#selectCraftType").value;
-	let item = getMainFrameElement("#selectCraftable").value;
-	return craft(type, item).then(function () {
-		return new Promise(function (resolve, reject) {
-			return sell(item).then(function () {
-				resolve();
-			});
-		});
-	});
-}
-
-function setupGrindLoop() {
-	setupLoop(grind);
-}
-
-function setupCraftLoop() {
-	setupLoop(craftAndSell);
-}
-
-function setupLoop(callback) {
-	setTimeout(function () {
-		checkInterrupts(callback)()
-		.then(function () {
-			if (!done) {
-				setupLoop(callback);
-			}
-		}, function () {
-			if (!done) {
-				setupLoop(callback);
-			}
-		});
-	}, getDelayValue());
-}
-
-function getDelayValue() {
-	var returnMe =
-		DisBar
-		 ? 0
-		 : top.ActionDelay;
-
-	return returnMe;
-}
-
-function grind() {
-	if (isInventoryFull()) {
-		return destroyItem();
-	} else if (isMainFrameElementPresent(selectors.castButton)) {
-		return cast();
-	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
-		return newFight();
-	} else {
-		return promise.then(function () {
-			return new Promise(function (resolve, reject) {
-				resolve();
-			});
-		});
-	}
-}
-
-function checkInterrupts(callback) {
-	if (isMainFrameElementPresent(selectors.security)) {
-		done = true;
-		alert("security");
-	}
-	//if dead revive
-	else if (isMainFrameElementPresent(selectors.reviveButton)) {
-
-		return function () {
+		setTimeout(function () {
+			setAction("Battle");
+			setTarget("Beast");
 			setTimeout(function () {
-				return revive();
-			}, reviveDelay);
-		}
-	}
-	//if level up buttons
-	else if (isMainFrameElementPresent(selectors.durButton)) {
-		return train;
-	} else if (isBeastActive()) {
-		done = true;
-		return beastHandler;
-	} else {
-		return callback;
-		// } else if (isMainFrameElementPresent(selectors.actionSubmit)) {
-		// return act();
-	}
-	// else {
-	// return promise.then(function () {
-	// return new Promise(function (resolve, reject) {
-	// resolve();
-	// });
-	// });
-	// }
-}
-
-function warpToBeast() {
-	var sf = top.frames.main.document.getElementById("skipform");
-	sf.action.value = "chat";
-	sf.target.value = "/bnb";
-	sf.other.value = 0;
-	pollzero(sf, 0, true);
+				resolve();
+			}, getDelay(standardDelay / 2));
+			// resolve();
+			// setupGrindLoop(standardDelay));
+		}, standardDelay);
+	});
 }
 
 function move(x, y) {
@@ -542,6 +382,146 @@ function move(x, y) {
 			});
 		});
 	}
+}
+
+function warpToBeast() {
+	var sf = top.frames.main.document.getElementById("skipform");
+	sf.action.value = "chat";
+	sf.target.value = "/bnb";
+	sf.other.value = 0;
+	pollzero(sf, 0, true);
+}
+
+function logBody() {
+	console.log(document.body.outerHTML);
+}
+
+//promise loops
+function craftAndSell() {
+	var type = getMainFrameElement("#selectCraftType").value;
+	var item = getMainFrameElement("#selectCraftable").value;
+	return craft(type, item).then(function () {
+		return new Promise(function (resolve, reject) {
+			return sell(item).then(function () {
+				resolve();
+			});
+		});
+	});
+}
+
+function setupGrindLoop() {
+	setupLoop(grind);
+}
+
+function setupCraftLoop() {
+	setupLoop(craftAndSell);
+}
+
+function setupLoop(callback) {
+	setTimeout(function () {
+		checkInterrupts(callback)()
+		.then(function () {
+			if (!done) {
+				setupLoop(callback);
+			}
+		}, function () {
+			if (!done) {
+				setupLoop(callback);
+			}
+		});
+	}, getDelayValue());
+}
+
+//logic branching
+
+function wantItem(text) {
+
+	if (!text) {
+		text = getChatText().join(" ");
+	}
+
+	var found = false;
+
+	var wantThese = [
+		"Believer",
+		"Cara",
+		"Spike",
+		"Decay",
+		"Vice",
+		"Apex",
+		"Scorn",
+		"Revenge",
+		"Melee",
+		"Devil"
+	];
+
+	wantThese.forEach(function (x) {
+		if (text.indexOf(x) > -1) {
+			found = true;
+		}
+	});
+
+	return found;
+}
+
+function getNextUnwantedItem() {
+	var select = document.querySelector(selectors.target);
+	if (!select) {
+		select = getMainFrameElement(selectors.target);
+	}
+	var options = select.querySelectorAll("option");
+
+	for (var i = 0; i < options.length; i++) {
+		var isEquipped = options[i].textContent.match(/EQUIPPED/) !== null;
+		var isDivider = options[i].textContent.match(/_/) !== null;
+		var wanted = wantItem(options[i].textContent);
+
+		if (!isEquipped && !wanted && !isDivider) {
+			return options[i].textContent;
+		}
+	}
+
+	return null;
+}
+
+function isTrivial(text) {
+	var chatText = getChatText();
+	if (!text) {
+		text = chatText[0] + chatText[1];
+	}
+	return text.indexOf("trivial") > -1
+}
+
+function craftingFailed() {
+	return getResponseMessage()
+	.indexOf("failed") > -1;
+}
+
+function checkInterrupts(callback) {
+	var returnMe;
+	if (isMainFrameElementPresent(selectors.security)) {
+		done = true;
+		alert("security");
+	}
+	//if dead revive
+	else if (isMainFrameElementPresent(selectors.reviveButton)) {
+
+		returnMe = function () {
+			setTimeout(function () {
+				return revive();
+			}, reviveDelay);
+		}
+	}
+	//if level up buttons
+	else if (isMainFrameElementPresent(selectors.durButton)) {
+		returnMe = train;
+	} else if (isBeastActive()) {
+		done = true;
+		returnMe = beastHandler;
+	} else {
+		returnMe = callback;
+	}
+	return returnMe;
 }
 
 function calculateWarpPoint(limit, start, end) {
@@ -590,6 +570,24 @@ function lerp(v0, v1, t) {
 	return v0 * (1 - t) + v1 * t
 }
 
+//delay handler
+function getDelayValue() {
+	var returnMe =
+		DisBar
+		 ? 0
+		 : top.ActionDelay;
+
+	return returnMe;
+}
+
+function getDelay(value) {
+	var returnMe = value;
+	returnMe *= isApex ? 2 : 1;
+	returnMe *= 1 - (haste / 200);
+	return returnMe;
+}
+
+//UI setup
 function moveHandler() {
 	cancelMove = false;
 	var x = prompt("enter target x");
@@ -605,14 +603,12 @@ function cancelMoveHandler() {
 	this.textContent = "move";
 }
 
-function logBody() {
-	console.log(document.body.outerHTML);
-}
 function stopGrindingHandler() {
 	done = true;
 	this.onclick = startGrindingHandler;
 	this.textContent = "Grind";
 }
+
 function startGrindingHandler() {
 	done = false;
 	this.onclick = stopGrindingHandler;
@@ -636,21 +632,25 @@ function startCraftingHandler() {
 }
 
 function createButton(id, text, handler) {
-	let returnMe = document.createElement("button");
+	var returnMe = document.createElement("button");
 	returnMe.id = id;
 	returnMe.textContent = text;
 	returnMe.onclick = handler;
 	return returnMe;
 }
+
 function createGrindButton() {
 	return createButton("btnGrind", "Grind", startGrindingHandler);
 }
+
 function createCraftButton() {
 	return createButton("btnCraft", "Craft", startCraftingHandler);
 }
+
 function createMoveButton() {
 	return createButton("btnMove", "Move", moveHandler);
 }
+
 function createWeaponSelect() {
 	return createSelect("selectWeapon", window.frames[0].window.top.weapons);
 }
@@ -690,8 +690,8 @@ function getCraftTypeList(type) {
 function setOptions(select, options) {
 	select.options.length = 0;
 
-	options.forEach(x => {
-		let option = document.createElement("option");
+	options.forEach(function (x) {
+		var option = document.createElement("option");
 		option.value = x;
 		option.textContent = x;
 		select.add(option);
@@ -709,7 +709,7 @@ function createMonsterSelect() {
 }
 
 function createSelect(id, options) {
-	let returnMe = document.createElement("select");
+	var returnMe = document.createElement("select");
 	returnMe.id = id;
 
 	setOptions(returnMe, options);
