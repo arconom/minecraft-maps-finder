@@ -151,7 +151,7 @@ function clickDur() {
 }
 
 function clickCast() {
-	parent.frames[0].window.gattack("cast")
+	parent.frames[0].window.gattack("cast");
 	// clickMainFrameElement(selectors.castButton);
 }
 
@@ -196,7 +196,7 @@ function selectOptionByText(selector, text) {
 
 	select.value = getOptionValueByText(selector, text);
 
-	if ("createEvent" in document) {
+	if (document.createEvent) {
 		var evt = document.createEvent("HTMLEvents");
 		evt.initEvent("change", false, true);
 		select.dispatchEvent(evt);
@@ -346,11 +346,11 @@ function beastHandler() {
 }
 
 function move(x, y) {
-	x = parseInt(x);
-	y = parseInt(y);
+	x = parseInt(x, 10);
+	y = parseInt(y, 10);
 	console.log("move", x, y);
 	// var ntl = parseInt(document.querySelector("#s_Ntl").textContent),
-	var limit = Math.floor(Math.sqrt(parseInt(Ntl) / 100)) - 1;
+	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
 	if (isNaN(limit)) {
 		throw ("no nan");
 	}
@@ -494,7 +494,7 @@ function isTrivial(text) {
 	if (!text) {
 		text = chatText[0] + chatText[1];
 	}
-	return text.indexOf("trivial") > -1
+	return text.indexOf("trivial") > -1;
 }
 
 function craftingFailed() {
@@ -515,7 +515,7 @@ function checkInterrupts(callback) {
 			setTimeout(function () {
 				return revive();
 			}, reviveDelay);
-		}
+		};
 	}
 	//if level up buttons
 	else if (isMainFrameElementPresent(selectors.durButton)) {
@@ -561,8 +561,8 @@ function calculateManhattanDistance(a, b) {
 
 function scrapeLocation() {
 	var returnMe = {
-		x: parseInt(window.LocX),
-		y: parseInt(window.LocY)
+		x: parseInt(window.LocX, 10),
+		y: parseInt(window.LocY, 10)
 	};
 	return returnMe;
 }
@@ -693,17 +693,17 @@ function createCraftTypeSelect() {
 function getCraftTypeList(type) {
 	var returnMe;
 	if (type.indexOf("Weapon") > -1) {
-		returnMe = window.frames[0].window.top.weapons
+		returnMe = window.frames[0].window.top.weapons;
 	} else if (type.indexOf("Damage") > -1) {
-		returnMe = window.frames[0].window.top.hurts
+		returnMe = window.frames[0].window.top.hurts;
 	} else if (type.indexOf("Heal") > -1) {
-		returnMe = window.frames[0].window.top.heals
+		returnMe = window.frames[0].window.top.heals;
 	} else if (type.indexOf("Relic") > -1) {
-		returnMe = window.frames[0].window.top.relics
+		returnMe = window.frames[0].window.top.relics;
 	} else if (type.indexOf("Element") > -1) {
-		returnMe = window.frames[0].window.top.elements
+		returnMe = window.frames[0].window.top.elements;
 	} else {
-		returnMe = window.frames[0].window.top.multi
+		returnMe = window.frames[0].window.top.multi;
 	}
 	return returnMe;
 }
@@ -738,7 +738,6 @@ function createSelect(id, options) {
 	return returnMe;
 }
 
-(function () {
 	var center = getMainFrame().querySelector("center");
 	var div = document.createElement("div");
 
@@ -757,4 +756,3 @@ function createSelect(id, options) {
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger")
 	getMainFrameElement(selectors.actionDelay).style = "display: none";
-})();
