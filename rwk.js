@@ -12,6 +12,7 @@ var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay
 var counter = 0;
 var done = false;
 var cancelMove = false;
+var rwkState = null;
 var pointsOfInterest = {
 	Pub: {
 		x: 150,
@@ -41,7 +42,9 @@ var selectors = {
 	mainFrame: "frame[name=\"main\"]",
 	target: "select[name=\"target\"]",
 	other: "select[name=\"other\"]",
-	chat: "#s_Chat"
+	chat: "#s_Chat",
+	chatSubmit: "#s_chatbut",
+	chatBox: "#chattybox"
 };
 
 NodeList.prototype.forEach = Array.prototype.forEach;
@@ -55,8 +58,8 @@ function getRWKState() {
 		isTrainingNeeded: isMainFrameElementPresent(selectors.durButton),
 		isTreasuryFull: false,
 		isKingdomOwnedByMe: false,
-		isWalletFull: false,
-		isTimedOut: false,
+		isWalletFull: parseInt(Tres, 10) === 2000000000,
+		isTimedOut: getResponseMessage().indexOf("timed out") > -1,
 		isInventoryFull: isInventoryFull(),
 		isSecurityResponseNeeded: isMainFrameElementPresent(selectors.security)
 	};
@@ -66,6 +69,22 @@ function getResponseMessage() {
 	return getMainFrameElement(selectors.response)
 	.textContent;
 
+}
+
+function getChatBox() {
+	var returnMe = document.querySelector(selectors.chatBox);
+	if (!returnMe) {
+		returnMe = getMainFrameElement(selectors.chatBox);
+	}
+	return returnMe;
+}
+
+function clickChatSubmit() {
+	var returnMe = document.querySelector(selectors.chatSubmit);
+	if (!returnMe) {
+		returnMe = getMainFrameElement(selectors.chatSubmit);
+	}
+	return returnMe;
 }
 
 function getChat() {
@@ -126,6 +145,36 @@ function getBeastPosition(text) {
 }
 
 //page object
+function waitForDOM(context, selector, testCallback, doneCallback, endTime) {
+	var element,
+	testResult = null;
+
+	if (!context) {
+		context = document;
+	}
+	if (!testCallback) {
+		testCallback = function (context, selector, element) {
+			return element ? true : false;
+		}
+	}
+	if (!endTime) {
+		endTime = new Date();
+		endTime = endTime.setSeconds(endTime.getSeconds() + 15);
+	}
+
+	element = context.querySelector(selector);
+	testResult = testCallback(context, selector, element);
+
+	if (testResult) {
+		return doneCallback(testResult);
+	} else if (Date.now() <= endTime) {
+		setTimeout(function () {
+			return waitForDOM(context, selector, testCallback, doneCallback, endTime);
+		}, 100);
+	} else {
+		return null;
+	}
+}
 
 function setTarget(text) {
 	selectOptionByText(selectors.target, text);
@@ -228,63 +277,66 @@ function getOptionValueByText(selector, text) {
 }
 
 //actions
-function revive() {
-	return new Promise(function (resolve, reject) {
-		clickRevive();
+function say(text) {
+	resolveAction(function () {
+		getChatBox().value = text;
+		getChatSubmit.click();
+	},
+		getDelay(newFightDelay));
 
+}
+
+function resolveAction(callback, delay) {
+	return new Promise(function (resolve, reject) {
+		callback();
+		waitForDOM(document, selectors.response, null, function () {
+			state = getRWKState();
+			resolve();
+		}, null);
+	})
+	.then(function () {
 		setTimeout(function () {
 			resolve();
-		}, getDelay(standardDelay / 2));
+		}, delay);
 	});
+}
+
+function revive() {
+	resolveAction(function () {
+		clickRevive();
+	}, getDelay(standardDelay / 2));
 }
 
 function train() {
-	return new Promise(function (resolve, reject) {
+	resolveAction(function () {
 		clickDur();
-		setTimeout(function () {
-			resolve();
-		}, getDelay(standardDelay / 2));
-	});
+	}, getDelay(standardDelay / 2));
 }
 
 function destroyItem(name) {
-	return new Promise(function (resolve, reject) {
-		setAction("DESTROY");
-		setTarget(getNextUnwantedItem());
-		act();
-		setTimeout(function () {
-			resolve();
-		}, getDelay(newFightDelay));
-	});
+	setAction("DESTROY");
+	setTarget(getNextUnwantedItem());
+	act();
 }
 
 function cast() {
-	return new Promise(function (resolve, reject) {
+	resolveAction(function () {
 		clickCast();
-		setTimeout(function () {
-			resolve();
-		}, getDelay(rapidDelay / 2));
-	});
+	},
+		getDelay(rapidDelay / 2));
 }
 
 function act() {
-	return new Promise(function (resolve, reject) {
+	resolveAction(function () {
 		clickActionSubmit();
-		setTimeout(function () {
-			resolve();
-		}, getDelay(newFightDelay));
-	});
+	},
+		getDelay(newFightDelay));
 }
 
 function newFight() {
-	return new Promise(function (resolve, reject) {
-		setAction("New Fight");
-		setTarget(getMainFrameElement("#selectMonster").value);
-		clickActionSubmit();
-		setTimeout(function () {
-			resolve();
-		}, getDelay(newFightDelay));
-	});
+	setAction("New Fight");
+	setTarget(getMainFrameElement("#selectMonster").value);
+	return act();
 }
 
 function craft(type, item) {
@@ -327,21 +379,13 @@ function sell(item) {
 function beastHandler() {
 	console.log("beastHandler");
 	return new Promise(function (resolve, reject) {
-		var p = getBeastPosition();
 		warpToBeast();
-		setTimeout(function () {
-			move(p.x, p.y);
-		}, standardDelay);
 
+		setAction("Battle");
+		setTarget("Beast");
 		setTimeout(function () {
-			setAction("Battle");
-			setTarget("Beast");
-			setTimeout(function () {
-				resolve();
-			}, getDelay(standardDelay / 2));
-			// resolve();
-			// setupGrindLoop(standardDelay));
-		}, standardDelay);
+			resolve();
+		}, getDelay(standardDelay / 2));
 	});
 }
 
@@ -349,7 +393,6 @@ function move(x, y) {
 	x = parseInt(x, 10);
 	y = parseInt(y, 10);
 	console.log("move", x, y);
-	// var ntl = parseInt(document.querySelector("#s_Ntl").textContent),
 	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
 	if (isNaN(limit)) {
 		throw ("no nan");
@@ -401,21 +444,20 @@ function logBody() {
 	console.log(document.body.outerHTML);
 }
 
-
 /* function grind() {
-	if (isInventoryFull()) {
-		return destroyItem();
-	} else if (isMainFrameElementPresent(selectors.castButton)) {
-		return cast();
-	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
-		return newFight();
-	} else {
-		return promise.then(function () {
-			return new Promise(function (resolve, reject) {
-				resolve();
-			});
-		});
-	}
+if (isInventoryFull()) {
+return destroyItem();
+} else if (isMainFrameElementPresent(selectors.castButton)) {
+return cast();
+} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
+return newFight();
+} else {
+return promise.then(function () {
+return new Promise(function (resolve, reject) {
+resolve();
+});
+});
+}
 }
  */
 
@@ -522,12 +564,12 @@ function craftingFailed() {
 
 function checkInterrupts(callback) {
 	var returnMe;
-	if (isMainFrameElementPresent(selectors.security)) {
+	if (state.isSecurityResponseNeeded) {
 		done = true;
 		alert("security");
 	}
 	//if dead revive
-	else if (isMainFrameElementPresent(selectors.reviveButton)) {
+	else if (state.isReviveNeeded) {
 
 		returnMe = function () {
 			setTimeout(function () {
@@ -536,9 +578,9 @@ function checkInterrupts(callback) {
 		};
 	}
 	//if level up buttons
-	else if (isMainFrameElementPresent(selectors.durButton)) {
+	else if (state.isTrainingNeeded) {
 		returnMe = train;
-	} else if (isBeastActive()) {
+	} else if (state.isBeastActive) {
 		done = true;
 		returnMe = beastHandler;
 	} else {
@@ -756,21 +798,21 @@ function createSelect(id, options) {
 	return returnMe;
 }
 
-	var center = getMainFrame().querySelector("center");
-	var div = document.createElement("div");
+var center = getMainFrame().querySelector("center");
+var div = document.createElement("div");
 
-	center.insertAdjacentElement("afterend", div);
+center.insertAdjacentElement("afterend", div);
 
-	div.appendChild(createGrindButton());
-	div.appendChild(createMonsterSelect());
-	div.appendChild(createCraftButton());
-	div.appendChild(createCraftTypeSelect());
-	div.appendChild(createCraftSelect());
-	div.appendChild(createMoveButton());
+div.appendChild(createGrindButton());
+div.appendChild(createMonsterSelect());
+div.appendChild(createCraftButton());
+div.appendChild(createCraftTypeSelect());
+div.appendChild(createCraftSelect());
+div.appendChild(createMoveButton());
 
-	center.style.display = "none";
+center.style.display = "none";
 
-	setTarget("Sheaf");
-	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
-	selectOptionByText("#selectCraftable", "Rusty Dagger")
-	getMainFrameElement(selectors.actionDelay).style = "display: none";
+setTarget("Sheaf");
+setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
+selectOptionByText("#selectCraftable", "Rusty Dagger")
+getMainFrameElement(selectors.actionDelay).style = "display: none";
