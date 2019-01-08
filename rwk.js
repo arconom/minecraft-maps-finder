@@ -278,7 +278,7 @@ function getOptionValueByText(selector, text) {
 
 //actions
 function say(text) {
-	resolveAction(function () {
+	return resolveAction(function () {
 		getChatBox().value = text;
 		getChatSubmit.click();
 	},
@@ -302,13 +302,13 @@ function resolveAction(callback, delay) {
 }
 
 function revive() {
-	resolveAction(function () {
+	return resolveAction(function () {
 		clickRevive();
 	}, getDelay(standardDelay / 2));
 }
 
 function train() {
-	resolveAction(function () {
+	return resolveAction(function () {
 		clickDur();
 	}, getDelay(standardDelay / 2));
 }
@@ -316,18 +316,18 @@ function train() {
 function destroyItem(name) {
 	setAction("DESTROY");
 	setTarget(getNextUnwantedItem());
-	act();
+	return act();
 }
 
 function cast() {
-	resolveAction(function () {
+	return resolveAction(function () {
 		clickCast();
 	},
 		getDelay(rapidDelay / 2));
 }
 
 function act() {
-	resolveAction(function () {
+	return resolveAction(function () {
 		clickActionSubmit();
 	},
 		getDelay(newFightDelay));
