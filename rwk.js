@@ -312,7 +312,7 @@ function resolveAction(callback, delay, selector, doneCallback) {
 			setTimeout(function () {
 				resolve();
 			}, delay);
-		}, 2000);
+		}, null);
 	});
 }
 
