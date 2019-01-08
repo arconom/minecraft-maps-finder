@@ -12,7 +12,7 @@ var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay
 var counter = 0;
 var done = false;
 var cancelMove = false;
-var rwkState = null;
+var rwkState = {};
 var pointsOfInterest = {
 	Pub: {
 		x: 150,
