@@ -290,7 +290,7 @@ function resolveAction(callback, delay) {
 	return new Promise(function (resolve, reject) {
 		callback();
 		waitForDOM(document, selectors.response, null, function () {
-			state = getRWKState();
+			rwkState = getRWKState();
 			resolve();
 		}, null);
 	})
@@ -564,12 +564,12 @@ function craftingFailed() {
 
 function checkInterrupts(callback) {
 	var returnMe;
-	if (state.isSecurityResponseNeeded) {
+	if (rwkState.isSecurityResponseNeeded) {
 		done = true;
 		alert("security");
 	}
 	//if dead revive
-	else if (state.isReviveNeeded) {
+	else if (rwkState.isReviveNeeded) {
 
 		returnMe = function () {
 			setTimeout(function () {
@@ -578,9 +578,9 @@ function checkInterrupts(callback) {
 		};
 	}
 	//if level up buttons
-	else if (state.isTrainingNeeded) {
+	else if (rwkState.isTrainingNeeded) {
 		returnMe = train;
-	} else if (state.isBeastActive) {
+	} else if (rwkState.isBeastActive) {
 		done = true;
 		returnMe = beastHandler;
 	} else {
