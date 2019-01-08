@@ -12,7 +12,6 @@ var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay
 var counter = 0;
 var done = false;
 var cancelMove = false;
-var rwkState = {};
 var pointsOfInterest = {
 	Pub: {
 		x: 150,
@@ -50,6 +49,7 @@ var selectors = {
 NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
+var rwkState = getRWKState();
 //state observers
 function getRWKState() {
 	return {
@@ -60,15 +60,20 @@ function getRWKState() {
 		isKingdomOwnedByMe: false,
 		isWalletFull: parseInt(Tres, 10) === 2000000000,
 		isTimedOut: getResponseMessage().indexOf("timed out") > -1,
+		enemyNotFound: getResponseMessage().indexOf("Enemy not found") > -1,
 		isInventoryFull: isInventoryFull(),
-		isSecurityResponseNeeded: isMainFrameElementPresent(selectors.security)
+		isSecurityResponseNeeded: isMainFrameElementPresent(selectors.security),
+		isFightInProgress: isMainFrameElementPresent(selectors.castButton)
 	};
 }
 
 function getResponseMessage() {
-	return getMainFrameElement(selectors.response)
-	.textContent;
-
+	var element = getMainFrameElement(selectors.response);
+	if (element) {
+		return element.textContent;
+	} else {
+		return "";
+	}
 }
 
 function getChatBox() {
@@ -278,65 +283,83 @@ function getOptionValueByText(selector, text) {
 
 //actions
 function say(text) {
+
+	console.log("say");
 	return resolveAction(function () {
 		getChatBox().value = text;
 		getChatSubmit.click();
 	},
-		getDelay(newFightDelay));
+		getDelay(newFightDelay), selectors.actionSubmit);
 
 }
 
-function resolveAction(callback, delay) {
+function resolveAction(callback, delay, selector, doneCallback) {
+	if (!selector) {
+		selector = selectors.response;
+	}
+	if (!doneCallback) {
+		doneCallback = function () {};
+	}
 	return new Promise(function (resolve, reject) {
+		var response = getResponseMessage();
 		callback();
-		waitForDOM(document, selectors.response, null, function () {
+		waitForDOM(document, selector, function () {
+			var r = getResponseMessage();
+			return r === "" || r !== response;
+		}, function () {
 			rwkState = getRWKState();
-			resolve();
-		}, null);
-	})
-	.then(function () {
-		setTimeout(function () {
-			resolve();
-		}, delay);
+			doneCallback();
+			setTimeout(function () {
+				resolve();
+			}, delay);
+		}, 2000);
 	});
 }
 
 function revive() {
+	console.log("revive");
 	return resolveAction(function () {
 		clickRevive();
-	}, getDelay(standardDelay / 2));
+	}, getDelay(standardDelay / 2), selectors.actionSubmit);
 }
 
 function train() {
+	console.log("train");
 	return resolveAction(function () {
 		clickDur();
-	}, getDelay(standardDelay / 2));
+	}, getDelay(standardDelay / 2), selectors.actionSubmit);
 }
 
 function destroyItem(name) {
+	console.log("destroy");
 	setAction("DESTROY");
 	setTarget(getNextUnwantedItem());
-	return act();
+	return resolveAction(function () {
+		clickActionSubmit();
+	}, getDelay(newFightDelay), null);
 }
 
 function cast() {
+	console.log("cast");
 	return resolveAction(function () {
 		clickCast();
 	},
 		getDelay(rapidDelay / 2));
 }
 
-function act() {
+function act(selector) {
 	return resolveAction(function () {
 		clickActionSubmit();
-	},
-		getDelay(newFightDelay));
+	}, getDelay(newFightDelay), selector);
 }
 
 function newFight() {
+	console.log("new fight");
 	setAction("New Fight");
 	setTarget(getMainFrameElement("#selectMonster").value);
-	return act();
+	return resolveAction(function () {
+		clickActionSubmit();
+	}, getDelay(newFightDelay), selectors.castButton);
 }
 
 function craft(type, item) {
@@ -348,8 +371,9 @@ function craft(type, item) {
 			setTarget(type);
 			setTimeout(function () {
 				setOther(item);
-				act();
-				setTimeout(function () {
+				resolveAction(function () {
+					clickActionSubmit();
+				}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length), null, function () {
 					if (isTrivial()) {
 						selectCraftable.selectedIndex += 1;
 					}
@@ -358,12 +382,11 @@ function craft(type, item) {
 					} else {
 						resolve();
 					}
-				}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length));
+				}, 1000);
 			}, 300);
-		}, 1000);
+		}, 300);
 	});
 }
-
 function sell(item) {
 	console.log("sell");
 	return new Promise(function (resolve, reject) {
@@ -444,22 +467,23 @@ function logBody() {
 	console.log(document.body.outerHTML);
 }
 
-/* function grind() {
-if (isInventoryFull()) {
-return destroyItem();
-} else if (isMainFrameElementPresent(selectors.castButton)) {
-return cast();
-} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
-return newFight();
-} else {
-return promise.then(function () {
-return new Promise(function (resolve, reject) {
-resolve();
-});
-});
+function grind() {
+	var returnMe;
+	if (rwkState.isInventoryFull) {
+		returnMe = destroyItem();
+	} else if (rwkState.isFightInProgress) {
+		returnMe = cast();
+	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
+		returnMe = newFight();
+	} else {
+		returnMe = promise.then(function () {
+				return new Promise(function (resolve, reject) {
+					resolve();
+				});
+			});
+	}
+	return returnMe;
 }
-}
- */
 
 //promise loops
 function craftAndSell() {
@@ -475,7 +499,7 @@ function craftAndSell() {
 }
 
 function setupGrindLoop() {
-	setupLoop(newFight);
+	setupLoop(grind);
 }
 
 function setupCraftLoop() {
@@ -483,6 +507,7 @@ function setupCraftLoop() {
 }
 
 function setupLoop(callback) {
+	rwkState = getRWKState();
 	setTimeout(function () {
 		checkInterrupts(callback)()
 		.then(function () {
@@ -583,7 +608,14 @@ function checkInterrupts(callback) {
 	} else if (rwkState.isBeastActive) {
 		done = true;
 		returnMe = beastHandler;
-	} else {
+	} else if (rwkState.isInventoryFull) {
+		done = true;
+		returnMe = destroyItem();
+	}
+	/* else if (rwkState.isFightInProgress) {
+	return cast();
+	} */
+	else {
 		returnMe = callback;
 	}
 	return returnMe;
