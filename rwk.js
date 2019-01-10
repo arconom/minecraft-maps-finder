@@ -641,6 +641,12 @@ function checkInterrupts(callback) {
 	var returnMe;
 	if (rwkState.isSecurityResponseNeeded) {
 		done = true;
+		var context = new AudioContext();
+		var o = context.createOscillator();
+		o.type = "sine";
+		o.connect(context.destination);
+		o.start();
+		setTimeout(function(){o.stop();}, 200);
 		alert("security");
 	}
 	//if dead revive
