@@ -1,4 +1,6 @@
 
+
+
 // gattack("attack");
 // gattack("lattack");
 // gattack("rattack");
@@ -31,8 +33,10 @@ var pointsOfInterest = {
 var selectors = {
 	actionDelay: "#s_ActionDelay",
 	actionsSelect: "select[name=\"action\"]",
+	kingdomActionsSelect: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > select:nth-child(2)",
 	teleportOption: "option[value=\"tele\"]",
 	actionSubmit: "#s_subbut > input[type=\"image\"]",
+	kingdomActionSubmit: "#s_subbut2 > input",
 	fightButtons: "#s_FightWin",
 	castButton: "#s_FightWin > img:nth-child(2)",
 	durButton: "img[onmousedown=\"level(3)\"]",
@@ -42,6 +46,8 @@ var selectors = {
 	mainFrame: "frame[name=\"main\"]",
 	target: "select[name=\"target\"]",
 	other: "select[name=\"other\"]",
+	othera: "select[name=\"othera\"]",
+	kingdomOtherA: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > input[type=\"text\"]",
 	chat: "#s_Chat",
 	chatSubmit: "#s_chatbut",
 	chatBox: "#chattybox",
@@ -54,16 +60,16 @@ var selectors = {
 NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
-var rwkState = getRWKState();
+// var rwkState = getRWKState();
 //state observers
 function getRWKState() {
 	return {
 		isReviveNeeded: isMainFrameElementPresent(selectors.reviveButton),
 		isBeastActive: isBeastActive(),
 		isTrainingNeeded: isMainFrameElementPresent(selectors.durButton),
-		isTreasuryFull: false,
-		isKingdomOwnedByMe: false,
-		isWalletFull: parseInt(Tres, 10) === 2000000000,
+		isTreasuryFull: parseInt(Tres, 10) === 2000000000,
+		isKingdomOwnedByMe: King == "Grelgor",
+		isWalletFull: parseInt(Gold, 10) === 2000000000,
 		isTimedOut: getResponseMessage().indexOf("timed out") > -1,
 		enemyNotFound: getResponseMessage().indexOf("Enemy not found") > -1,
 		isInventoryFull: isInventoryFull(),
@@ -132,8 +138,8 @@ function isBeastActive(text) {
 	}
 
 	return (awakeIndex > -1)
-	 && ((deadIndex.index == -1)
-		 || (deadIndex.index > awakeIndex.index));
+	 && ((deadIndex == -1)
+		 || (deadIndex > awakeIndex));
 }
 
 function isInventoryFull() {
@@ -154,7 +160,15 @@ function getBeastPosition(text) {
 }
 
 //page object
-function waitForDOM(context, selector, testCallback, doneCallback, endTime) {
+function clickLogin() {
+	getMainFrameElement("#subshit").click();
+}
+
+function setPassword(value) {
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(5) > td > input[type=\"password\"]:nth-child(6)").value = value;
+}
+
+function waitForDOM(context, selector, testCallback, doneCallback, failCallback, endTime) {
 	var element,
 	testResult = null;
 
@@ -181,7 +195,7 @@ function waitForDOM(context, selector, testCallback, doneCallback, endTime) {
 			return waitForDOM(context, selector, testCallback, doneCallback, endTime);
 		}, 100);
 	} else {
-		return null;
+		return failCallback();
 	}
 }
 
@@ -195,8 +209,20 @@ function setAction(text) {
 	// parent.frames[0].window.updateaction(this.options[this.selectedIndex].value,document.getElementById('general'));
 }
 
+function setKingdomAction(text) {
+	selectOptionByText(selectors.kingdomActionsSelect, text);
+}
+
 function setOther(text) {
 	selectOptionByText(selectors.other, text);
+}
+
+function setOtherA(value) {
+	getMainFrameElement(selectors.othera).value = value;
+}
+
+function setKingdomOtherA(value) {
+	getMainFrameElement(selectors.kingdomOtherA).value = value;
 }
 
 function clickActionSubmit() {
@@ -300,6 +326,10 @@ function getOptions(selector) {
 	return select.querySelectorAll("option");
 }
 
+function clickKingdomActionSubmit() {
+	getElement(selectors.kingdomActionSubmit).click();
+}
+
 //actions
 function say(text) {
 
@@ -321,10 +351,18 @@ function resolveAction(callback, delay, selector, doneCallback) {
 	}
 	return new Promise(function (resolve, reject) {
 		var response = getResponseMessage();
+		var chat = getChat();
 		callback();
 		waitForDOM(getMainFrame(), selector, function () {
 			var r = getResponseMessage();
-			return r === "" || r !== response;
+			var c = getChat();
+			return r === "" || r !== response || c !== chat;
+		}, function () {
+			rwkState = getRWKState();
+			doneCallback();
+			setTimeout(function () {
+				resolve();
+			}, delay);
 		}, function () {
 			rwkState = getRWKState();
 			doneCallback();
@@ -504,6 +542,14 @@ function grind() {
 	return returnMe;
 }
 
+function embezzle() {
+	setKingdomAction("Embezzle");
+	setKingdomOtherA("260000000");
+	return resolveAction(function () {
+		clickKingdomActionSubmit();
+	}, getDelay(newFightDelay), selectors.kingdomActionSubmit);
+}
+
 //promise loops
 function craftAndSell() {
 	var type = getMainFrameElement("#selectCraftType").value;
@@ -554,7 +600,7 @@ function wantItem(text) {
 	var wantThese = [
 		"Believer",
 		"Cara",
-		"Spike",
+		"Death Spike",
 		"Decay",
 		"Vice",
 		"Apex",
@@ -646,7 +692,9 @@ function checkInterrupts(callback) {
 		o.type = "sine";
 		o.connect(context.destination);
 		o.start();
-		setTimeout(function(){o.stop();}, 200);
+		setTimeout(function () {
+			o.stop();
+		}, 200);
 		alert("security");
 	}
 	//if dead revive
@@ -667,6 +715,8 @@ function checkInterrupts(callback) {
 	} else if (rwkState.isInventoryFull) {
 		// done = true;
 		returnMe = destroyItem;
+	} else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
+		returnMe = embezzle;
 	}
 	/* else if (rwkState.isFightInProgress) {
 	return cast();
@@ -733,13 +783,12 @@ function lerp(v0, v1, t) {
 
 //delay handler
 function getLoopDelayValue() {
-	var returnMe;
+	var returnMe = window.frames[0].top.ActionDelay;
 
 	if (DisBar) {
 		returnMe = 0;
-	} else {
-		returnMe = top.ActionDelay;
 	}
+
 	return returnMe;
 }
 
@@ -888,19 +937,102 @@ function createSelect(id, options) {
 	return returnMe;
 }
 
-var center = getMainFrame().querySelector("center");
-var div = document.createElement("div");
+function AddStyleSheet(content) {
+	//for cross browser compatibility, use the following commented statement
+	//var cssRuleCode = document.all ? 'rules' : 'cssRules'; //account for IE and FF
 
-center.insertAdjacentElement("afterend", div);
+	getMainFrame().querySelector("head").appendChild(this.CreateStyleSheet(content));
+}
 
-div.appendChild(createGrindButton());
-div.appendChild(createMonsterSelect());
-div.appendChild(createCraftButton());
-div.appendChild(createCraftTypeSelect());
-div.appendChild(createCraftSelect());
-div.appendChild(createMoveButton());
+/*
+This function creates a style sheet and returns it.
+ */
+function CreateStyleSheet(content) {
+	var style = document.createElement("style");
+	var styleSheet = style.styleSheet;
 
-setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
-selectOptionByText("#selectCraftable", "Rusty Dagger");
-getMainFrameElement(selectors.actionDelay).style = "display: none";
+	if (styleSheet) {
+		stylesheet.cssText = content;
+	} else {
+		style.appendChild(document.createTextNode(content));
+	}
 
+	style.type = "text/css";
+	return style;
+}
+
+setPassword("1qaz!QAZ2wsx@WSX");
+clickLogin();
+
+setTimeout(function () {
+
+	var center = getMainFrame().querySelector("center");
+	var div = document.createElement("div");
+	div.cssClass = "addedDiv";
+
+	var grindDiv = document.createElement("div");
+	grindDiv.appendChild(createGrindButton());
+	grindDiv.appendChild(createMonsterSelect());
+
+	var craftDiv = document.createElement("div");
+	craftDiv.appendChild(createCraftButton());
+	craftDiv.appendChild(createCraftTypeSelect());
+	craftDiv.appendChild(createCraftSelect());
+
+	var moveDiv = document.createElement("div");
+	moveDiv.appendChild(createMoveButton());
+
+	div.appendChild(grindDiv);
+	div.appendChild(craftDiv);
+	div.appendChild(moveDiv);
+
+	center.insertAdjacentElement("afterend", div);
+
+	// center.style.display = "none";
+
+	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
+	selectOptionByText("#selectCraftable", "Rusty Dagger");
+	getMainFrameElement(selectors.actionDelay).style = "display: none";
+	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
+	getMainFrameElement(selectors.kingdomTable).onclick = function () {
+		var className = " hideDetails";
+		var classIndex = this.className.indexOf(className);
+		if (classIndex > -1) {
+			this.className = this.className.slice(0, classIndex - 1) + this.className.slice(classIndex + className.length);
+		} else {
+			this.className += className;
+		}
+	};
+
+	getMainFrameElement(selectors.playerTable).querySelectorAll("td[width]").forEach(function (x) {
+		x.setAttribute("width", "");
+	});
+	getMainFrameElement(selectors.kingdomTable).querySelectorAll("td[width]").forEach(function (x) {
+		x.setAttribute("width", "");
+	});
+
+	AddStyleSheet(
+		"button{padding: 8px; border-radius: .5em; font-size: larger;}"
+		 + "select{padding: 8px; font-size: larger;}"
+		// + "input, select, button{width: calc(100vw - 4%);}"
+		// + selectors.kingdomTable + "{width: 100vw; float: right;}"
+		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)" + "{display: none;}"
+		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)" + "{display: none;}"
+		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)" + "{display: none;}"
+		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
+		 + selectors.kingdomTable + " td[width]" + "{display: block;}"
+		// + selectors.kingdomTable + " td " + "{width: 100vw;}"
+		 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
+		 + selectors.playerTable + "," + selectors.kingdomTable + "{display: inline-table; width: 20em;}"
+		// + selectors.playerTable + " td " + "{width: 100vw;}"
+		 + selectors.playerTable + " td[width]" + "{display: block;}"
+		 + "td[background]{display:none;}"
+		 + selectors.playerTable + " tr:nth-child(1)"
+		 + "," + selectors.playerTable + " tr:nth-child(5)"
+		 + "," + selectors.kingdomTable + " tr:nth-child(1)"
+		 + "," + selectors.kingdomTable + " tr:nth-child(8)"
+		 + "{display: none;}"
+		// + selectors.windowTable + "{}"
+	);
+
+}, 5000);
