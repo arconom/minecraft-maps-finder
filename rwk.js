@@ -49,7 +49,7 @@ var selectors = {
 	othera: "select[name=\"othera\"]",
 	kingdomOtherA: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > input[type=\"text\"]",
 	chat: "#s_Chat",
-	chatSubmit: "#s_chatbut",
+	chatSubmit: "#s_chatbut > input",
 	chatBox: "#chattybox",
 	kingdomTable: "body > table > tbody > tr:nth-child(2) > td > table",
 	playerTable: "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table",
@@ -160,6 +160,8 @@ function getBeastPosition(text) {
 }
 
 //page object
+
+
 function clickLogin() {
 	getMainFrameElement("#subshit").click();
 }
@@ -315,8 +317,7 @@ function getOptionValueByText(selector, text) {
 		}
 	}
 	if (!returnMe) {
-		console.log(select, text);
-		throw ("option not found");
+		returnMe = "";
 	}
 	return returnMe;
 }
@@ -330,19 +331,59 @@ function clickKingdomActionSubmit() {
 	getElement(selectors.kingdomActionSubmit).click();
 }
 
-//actions
-function say(text) {
+function clickChatSubmit() {
+	getElement(selectors.chatSubmit).click();
+}
 
+//actions
+
+function move(dir) {
+	console.log("move");
+	return resolveAction(function () {
+		window.frames[0].Move(dir);
+	}, getDelay(newFightDelay * 2), selectors.actionSubmit);
+}
+
+function moveNorth() {
+	console.log("moveNorth");
+	return move(0);
+}
+
+function moveSouth() {
+	console.log("moveSouth");
+	return move(1);
+}
+
+function moveEast() {
+	console.log("moveEast");
+	return move(2);
+}
+
+function moveWest() {
+	console.log("moveWest");
+	return move(3);
+}
+
+function moveUp() {
+	console.log("moveUp");
+	return move(4);
+}
+
+function moveDown() {
+	console.log("moveDown");
+	return move(5);
+}
+
+function say(text) {
 	console.log("say");
 	return resolveAction(function () {
 		getChatBox().value = text;
-		getChatSubmit.click();
-	},
-		getDelay(newFightDelay), selectors.actionSubmit);
-
+		clickChatSubmit();
+	}, getDelay(newFightDelay), selectors.actionSubmit);
 }
 
 function resolveAction(callback, delay, selector, doneCallback) {
+	console.log("resolveAction");
 	if (!selector) {
 		selector = selectors.response;
 	}
@@ -405,6 +446,7 @@ function cast() {
 }
 
 function act(selector) {
+	console.log("act");
 	return resolveAction(function () {
 		clickActionSubmit();
 	}, getDelay(newFightDelay), selector);
@@ -462,17 +504,73 @@ function beastHandler() {
 		warpToBeast();
 
 		setAction("Battle");
-		setTarget("Beast");
+		// setTarget("Beast");
 		setTimeout(function () {
-			resolve();
+			findBeast()
+			// .then(function () {
+				// resolve();
+			// })
+			;
 		}, getDelay(standardDelay / 2));
 	});
 }
 
-function move(x, y) {
+function findBeast() {
+	setAction("Battle");
+
+	var dirs = [3, 0, 2, 2, 1, 1, 2, 2];
+	var returnMe = null;
+	var promiseChain = new Promise(function (resolve, reject) {
+			if (isBeastHere()) {
+				getElement(selectors.target).selectedIndex = 2;
+				act().then(function () {
+					// setTarget("Beast");
+					// act().then(function(){
+					resolve();
+					// });
+				});
+			} else {
+				reject();
+			}
+		});
+
+	for (let i = 0; i < dirs.length; i++) {
+		promiseChain = promiseChain.then(function () {
+				return act();
+			}, function () {
+				return new Promise(function (resolve, reject) {
+					move(dirs[i])
+					.then(function () {
+						if (isBeastHere()) {
+							getElement(selectors.target).selectedIndex = 2;
+							// setTarget("Beast");
+							// act().then(function(){
+							resolve();
+							// });
+						} else {
+							reject();
+						}
+					});
+				});
+			});
+	}
+
+	// promiseChain.then(function () {
+		// return new Promise(function (resolve, reject) {});
+	// });
+
+	// return promiseChain;
+}
+
+function isBeastHere() {
+	console.log("isBeastHere");
+	return getElement(selectors.target).querySelectorAll("option").length > 1;
+}
+
+function teleport(x, y) {
 	x = parseInt(x, 10);
 	y = parseInt(y, 10);
-	console.log("move", x, y);
+	// console.log("teleport", x, y);
 	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
 	if (isNaN(limit)) {
 		throw ("no nan");
@@ -482,7 +580,7 @@ function move(x, y) {
 	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
 		promise.then(function (resolve, reject) {
 			return new Promise(function (resolve, reject) {
-				console.log("move loop", loc.x, loc.y);
+				console.log("teleport loop", loc.x, loc.y);
 
 				var point = calculateWarpPoint(limit, loc, {
 						x: x,
@@ -503,7 +601,7 @@ function move(x, y) {
 
 					setTimeout(function () {
 						resolve();
-						move(x, y);
+						teleport(x, y);
 					}, 6000);
 
 				}, 300);
@@ -513,11 +611,8 @@ function move(x, y) {
 }
 
 function warpToBeast() {
-	var sf = top.frames.main.document.getElementById("skipform");
-	sf.action.value = "chat";
-	sf.target.value = "/bnb";
-	sf.other.value = 0;
-	pollzero(sf, 0, true);
+	say("/bnb");
+	rwkState.hasWarped = true;
 }
 
 function logBody() {
@@ -687,14 +782,7 @@ function checkInterrupts(callback) {
 	var returnMe;
 	if (rwkState.isSecurityResponseNeeded) {
 		done = true;
-		var context = new AudioContext();
-		var o = context.createOscillator();
-		o.type = "sine";
-		o.connect(context.destination);
-		o.start();
-		setTimeout(function () {
-			o.stop();
-		}, 200);
+		makeNoise();
 		alert("security");
 	}
 	//if dead revive
@@ -711,6 +799,7 @@ function checkInterrupts(callback) {
 		returnMe = train;
 	} else if (rwkState.isBeastActive) {
 		done = true;
+		makeNoise();
 		returnMe = beastHandler;
 	} else if (rwkState.isInventoryFull) {
 		// done = true;
@@ -725,6 +814,23 @@ function checkInterrupts(callback) {
 		returnMe = callback;
 	}
 	return returnMe;
+}
+
+function makeNoise() {
+	var context = new AudioContext();
+	var o = context.createOscillator();
+	o.type = "sine";
+	o.connect(context.destination);
+	o.start();
+	setTimeout(function () {
+		o.stop();
+	}, 200);
+}
+
+function isNearBeast() {
+	window.frames[0].LocX
+	window.frames[0].LocY
+
 }
 
 function calculateWarpPoint(limit, start, end) {
@@ -806,7 +912,7 @@ function moveHandler() {
 	cancelMove = false;
 	var x = prompt("enter target x");
 	var y = prompt("enter target y");
-	move(x, y);
+	teleport(x, y);
 	this.onclick = cancelMoveHandler;
 	this.textContent = "cancel Move";
 }
@@ -814,7 +920,7 @@ function moveHandler() {
 function cancelMoveHandler() {
 	cancelMove = true;
 	this.onclick = moveHandler;
-	this.textContent = "move";
+	this.textContent = "teleport";
 }
 
 function stopGrindingHandler() {
