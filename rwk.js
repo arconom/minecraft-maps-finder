@@ -508,9 +508,9 @@ function beastHandler() {
 		setTimeout(function () {
 			findBeast()
 			// .then(function () {
-				// resolve();
+			// resolve();
 			// })
-			;
+		;
 		}, getDelay(standardDelay / 2));
 	});
 }
@@ -535,31 +535,35 @@ function findBeast() {
 		});
 
 	for (let i = 0; i < dirs.length; i++) {
-		promiseChain = promiseChain.then(function () {
-				return act();
-			}, function () {
-				return new Promise(function (resolve, reject) {
-					move(dirs[i])
-					.then(function () {
-						if (isBeastHere()) {
-							getElement(selectors.target).selectedIndex = 2;
-							// setTarget("Beast");
-							// act().then(function(){
-							resolve();
-							// });
-						} else {
-							reject();
-						}
-					});
-				});
-			});
+		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
 	}
 
 	// promiseChain.then(function () {
-		// return new Promise(function (resolve, reject) {});
+	// return new Promise(function (resolve, reject) {});
 	// });
 
 	// return promiseChain;
+}
+
+function findBeastResolveHandler() {
+	return act();
+}
+
+function findBeastRejectHandler() {
+	return new Promise(function (resolve, reject) {
+		move(dirs[i])
+		.then(function () {
+			if (isBeastHere()) {
+				getElement(selectors.target).selectedIndex = 2;
+				// setTarget("Beast");
+				// act().then(function(){
+				resolve();
+				// });
+			} else {
+				reject();
+			}
+		});
+	});
 }
 
 function isBeastHere() {
