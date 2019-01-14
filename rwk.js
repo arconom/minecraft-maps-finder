@@ -80,11 +80,13 @@ function getRWKState() {
 
 function getResponseMessage() {
 	var element = getMainFrameElement(selectors.response);
+	var returnMe = "";
 	if (element) {
-		return element.textContent;
+		returnMe = element.textContent;
 	} else {
-		return "";
+		returnMe = "";
 	}
+	return returnMe;
 }
 
 function getChatBox() {
@@ -833,8 +835,8 @@ function makeNoise() {
 }
 
 function isNearBeast() {
-	window.frames[0].LocX
-	window.frames[0].LocY
+	// window.frames[0].LocX
+	// window.frames[0].LocY
 
 }
 
