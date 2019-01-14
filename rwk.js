@@ -150,12 +150,13 @@ function getBeastPosition(text) {
 	if (!text) {
 		text = getChatText().join(" ");
 	}
-	var awakePattern = /awoken[\w ]+beast[a-zA-Z ]+(\d+),\w+,(\d+)/;
+	var awakePattern = /awoken[\w ]+beast[a-zA-Z ]+(\d+),(\w+),(\d+)/;
 
 	var match = text.match(awakePattern);
 	return {
 		x: match[1],
-		y: match[2]
+		y: match[3],
+		plane: match[2]
 	};
 }
 
@@ -518,7 +519,7 @@ function beastHandler() {
 function findBeast() {
 	setAction("Battle");
 
-	var dirs = [3, 0, 2, 2, 1, 1, 3, 3];
+	var dirs = [3, 0, 2, 2, 1, 1, 3, 2y];
 	var returnMe = null;
 	var promiseChain = new Promise(function (resolve, reject) {
 			if (isBeastHere()) {
@@ -801,7 +802,7 @@ function checkInterrupts(callback) {
 	//if level up buttons
 	else if (rwkState.isTrainingNeeded) {
 		returnMe = train;
-	} else if (rwkState.isBeastActive) {
+	} else if (rwkState.isBeastActive && getBeastPosition().indexOf("Sur") > -1) {
 		done = true;
 		makeNoise();
 		returnMe = beastHandler;
