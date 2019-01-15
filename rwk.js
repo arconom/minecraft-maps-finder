@@ -57,6 +57,18 @@ var selectors = {
 
 };
 
+var kd = [{
+		x: 157,
+		y: 49
+	}, {
+		x: 157,
+		y: 48
+	}, {
+		x: 157,
+		y: 47
+	}
+];
+
 NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
@@ -80,13 +92,11 @@ function getRWKState() {
 
 function getResponseMessage() {
 	var element = getMainFrameElement(selectors.response);
-	var returnMe = "";
 	if (element) {
-		returnMe = element.textContent;
+		return element.textContent;
 	} else {
-		returnMe = "";
+		return "";
 	}
-	return returnMe;
 }
 
 function getChatBox() {
@@ -152,13 +162,12 @@ function getBeastPosition(text) {
 	if (!text) {
 		text = getChatText().join(" ");
 	}
-	var awakePattern = /awoken[\w ]+beast[a-zA-Z ]+(\d+),(\w+),(\d+)/;
+	var awakePattern = /awoken[\w ]+beast[a-zA-Z ]+(\d+),\w+,(\d+)/;
 
 	var match = text.match(awakePattern);
 	return {
 		x: match[1],
-		y: match[3],
-		plane: match[2]
+		y: match[2]
 	};
 }
 
@@ -521,7 +530,7 @@ function beastHandler() {
 function findBeast() {
 	setAction("Battle");
 
-	var dirs = [3, 0, 2, 2, 1, 1, 3, 2y];
+	var dirs = [3, 0, 2, 2, 1, 1, 2, 2];
 	var returnMe = null;
 	var promiseChain = new Promise(function (resolve, reject) {
 			if (isBeastHere()) {
@@ -537,8 +546,25 @@ function findBeast() {
 			}
 		});
 
-	for (var i = 0; i < dirs.length; i++) {
-		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
+	for (let i = 0; i < dirs.length; i++) {
+		promiseChain = promiseChain.then(function () {
+				return act();
+			}, function () {
+				return new Promise(function (resolve, reject) {
+					move(dirs[i])
+					.then(function () {
+						if (isBeastHere()) {
+							getElement(selectors.target).selectedIndex = 2;
+							// setTarget("Beast");
+							// act().then(function(){
+							resolve();
+							// });
+						} else {
+							reject();
+						}
+					});
+				});
+			});
 	}
 
 	// promiseChain.then(function () {
@@ -546,27 +572,6 @@ function findBeast() {
 	// });
 
 	// return promiseChain;
-}
-
-function findBeastResolveHandler() {
-	return act();
-}
-
-function findBeastRejectHandler() {
-	return new Promise(function (resolve, reject) {
-		move(dirs[i])
-		.then(function () {
-			if (isBeastHere()) {
-				getElement(selectors.target).selectedIndex = 2;
-				// setTarget("Beast");
-				// act().then(function(){
-				resolve();
-				// });
-			} else {
-				reject();
-			}
-		});
-	});
 }
 
 function isBeastHere() {
@@ -585,7 +590,7 @@ function teleport(x, y) {
 	var loc = scrapeLocation();
 
 	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
-		promise.then(function (resolve, reject) {
+		promise.then(function () {
 			return new Promise(function (resolve, reject) {
 				console.log("teleport loop", loc.x, loc.y);
 
@@ -602,19 +607,31 @@ function teleport(x, y) {
 
 					getMainFrameElement(selectors.target).value = point.x;
 					getMainFrameElement(selectors.other).value = point.y;
-					// document.querySelector("select[name=\"target\"]").value = x;
-					// document.querySelector("select[name=\"other\"]").value = y;
 					getMainFrameElement(selectors.actionSubmit).click();
 
-					setTimeout(function () {
-						resolve();
-						teleport(x, y);
-					}, 6000);
+					waitForDOM(window.frames[0].document, selectors.response, null, function () {
+						if (getResponseMessage().indexOf("purchase") > -1) {
+							reject();
+						} else {
+							setTimeout(function () {
+								resolve();
+								teleport(x, y);
+							}, 6000);
+						}
+					}, failCallback, null);
 
 				}, 300);
 			});
 		});
 	}
+}
+
+function walkKingdoms(){
+	// go to kd
+	// check tres
+	// embezzle if needed
+	// if gold > 1.7, buy rune
+	
 }
 
 function warpToBeast() {
@@ -804,7 +821,7 @@ function checkInterrupts(callback) {
 	//if level up buttons
 	else if (rwkState.isTrainingNeeded) {
 		returnMe = train;
-	} else if (rwkState.isBeastActive && getBeastPosition().indexOf("Sur") > -1) {
+	} else if (rwkState.isBeastActive) {
 		done = true;
 		makeNoise();
 		returnMe = beastHandler;
@@ -835,8 +852,8 @@ function makeNoise() {
 }
 
 function isNearBeast() {
-	// window.frames[0].LocX
-	// window.frames[0].LocY
+	window.frames[0].LocX
+	window.frames[0].LocY
 
 }
 
@@ -977,7 +994,13 @@ function createCraftButton() {
 }
 
 function createMoveButton() {
-	return createButton("btnMove", "Move", moveHandler);
+	return createButton("btnMove", "Teleport", moveHandler);
+}
+
+function createHomeButton() {
+	return createButton("btnHome", "Home", function () {
+		teleport(157, 49);
+	});
 }
 
 function createWeaponSelect() {
@@ -1094,6 +1117,7 @@ setTimeout(function () {
 
 	var moveDiv = document.createElement("div");
 	moveDiv.appendChild(createMoveButton());
+	moveDiv.appendChild(createHomeButton());
 
 	div.appendChild(grindDiv);
 	div.appendChild(craftDiv);
