@@ -30,6 +30,25 @@ var pointsOfInterest = {
 	}
 };
 
+var cssString =
+	"*{display: none}"
+	 + "button{padding: 8px; border-radius: .5em; font-size: larger;}"
+	 + "select{padding: 8px; font-size: larger;}"
+	 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)"
+	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)"
+	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)"
+	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
+	 + selectors.kingdomTable + " td[width]" + "{display: block;}"
+	 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
+	 + selectors.playerTable + "," + selectors.kingdomTable + "{display: inline-table; width: 20em;}"
+	 + selectors.playerTable + " td[width]" + "{display: block;}"
+	 + "td[background]{display:none;}"
+	 + selectors.playerTable + " tr:nth-child(1)"
+	 + "," + selectors.playerTable + " tr:nth-child(5)"
+	 + "," + selectors.kingdomTable + " tr:nth-child(1)"
+	 + "," + selectors.kingdomTable + " tr:nth-child(8)"
+	 + "{display: none;}";
+
 var selectors = {
 	actionDelay: "#s_ActionDelay",
 	actionsSelect: "select[name=\"action\"]",
@@ -868,8 +887,7 @@ function checkInterrupts(callback) {
 		returnMe = destroyItem;
 	} else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
 		returnMe = embezzle;
-	}
-	else {
+	} else {
 		returnMe = callback;
 	}
 	return returnMe;
@@ -1168,10 +1186,9 @@ setTimeout(function () {
 
 	center.insertAdjacentElement("afterend", div);
 
-	// center.style.display = "none";
-
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger");
+
 	getMainFrameElement(selectors.actionDelay).style = "display: none";
 	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
 	getMainFrameElement(selectors.kingdomTable).onclick = function () {
@@ -1191,24 +1208,7 @@ setTimeout(function () {
 		x.setAttribute("width", "");
 	});
 
-	AddStyleSheet(
-		"button{padding: 8px; border-radius: .5em; font-size: larger;}"
-		 + "select{padding: 8px; font-size: larger;}"
-		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)" 
-		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)" 
-		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)" 
-		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
-		 + selectors.kingdomTable + " td[width]" + "{display: block;}"
-		 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
-		 + selectors.playerTable + "," + selectors.kingdomTable + "{display: inline-table; width: 20em;}"
-		 + selectors.playerTable + " td[width]" + "{display: block;}"
-		 + "td[background]{display:none;}"
-		 + selectors.playerTable + " tr:nth-child(1)"
-		 + "," + selectors.playerTable + " tr:nth-child(5)"
-		 + "," + selectors.kingdomTable + " tr:nth-child(1)"
-		 + "," + selectors.kingdomTable + " tr:nth-child(8)"
-		 + "{display: none;}"
-	);
+	AddStyleSheet(cssString);
 
 }, 5000);
 
