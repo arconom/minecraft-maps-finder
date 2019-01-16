@@ -31,22 +31,21 @@ var pointsOfInterest = {
 };
 
 var cssString =
-	"*{display: none}"
 	 + "button{padding: 8px; border-radius: .5em; font-size: larger;}"
 	 + "select{padding: 8px; font-size: larger;}"
-	 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)"
-	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)"
-	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)"
-	 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
-	 + selectors.kingdomTable + " td[width]" + "{display: block;}"
+	 + "body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)"
+	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)"
+	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)"
+	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7){display: none;}"
+	 + "body > table > tbody > tr:nth-child(2) > td > table td[width]{display: block;}"
 	 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
-	 + selectors.playerTable + "," + selectors.kingdomTable + "{display: inline-table; width: 20em;}"
-	 + selectors.playerTable + " td[width]" + "{display: block;}"
+	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table{display: inline-table; width: 20em;}"
+	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]{display: block;}"
 	 + "td[background]{display:none;}"
-	 + selectors.playerTable + " tr:nth-child(1)"
-	 + "," + selectors.playerTable + " tr:nth-child(5)"
-	 + "," + selectors.kingdomTable + " tr:nth-child(1)"
-	 + "," + selectors.kingdomTable + " tr:nth-child(8)"
+	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)"
+	 + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)"
+	 + ",body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)"
+	 + ",body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)"
 	 + "{display: none;}";
 
 var selectors = {
