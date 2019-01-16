@@ -532,7 +532,7 @@ function findBeast() {
 			}
 		});
 
-	for (let i = 0; i < dirs.length; i++) {
+	for (var i = 0; i < dirs.length; i++) {
 		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
 	}
 }
