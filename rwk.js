@@ -34,7 +34,7 @@ var selectors = {
 	actionDelay: "#s_ActionDelay",
 	actionsSelect: "select[name=\"action\"]",
 	kingdomActionsSelect: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > select:nth-child(2)",
-	teleportOption: "option[value=\"tele\"]",
+	travelOption: "option[value=\"tele\"]",
 	actionSubmit: "#s_subbut > input[type=\"image\"]",
 	kingdomActionSubmit: "#s_subbut2 > input",
 	fightButtons: "#s_FightWin",
@@ -442,8 +442,7 @@ function cast() {
 	console.log("cast");
 	return resolveAction(function () {
 		clickCast();
-	},
-		getDelay(rapidDelay));
+	}, getDelay(rapidDelay));
 }
 
 function act(selector) {
@@ -487,6 +486,7 @@ function craft(type, item) {
 		}, 300);
 	});
 }
+
 function sell(item) {
 	console.log("sell");
 	return new Promise(function (resolve, reject) {
@@ -536,6 +536,7 @@ function findBeast() {
 		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
 	}
 }
+
 function findBeastResolveHandler() {
 	return act();
 }
@@ -556,53 +557,71 @@ function findBeastRejectHandler() {
 		});
 	});
 }
+
 function isBeastHere() {
 	console.log("isBeastHere");
 	return getElement(selectors.target).querySelectorAll("option").length > 1;
 }
 
 function teleport(x, y) {
-	x = parseInt(x, 10);
-	y = parseInt(y, 10);
-	// console.log("teleport", x, y);
-	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
+	console.log("moving to ", point);
+	setAction("Teleport");
+	// parent.frames[0].window.updateaction("tele", getMainFrameElement('#general'));
+
+	return new Promise(function (resolve, reject) {
+
+		waitForDOM(window.frames[0].document, selectors.other, null, function () {
+
+			getMainFrameElement(selectors.target).value = x;
+			getMainFrameElement(selectors.other).value = y;
+
+			resolveAction(function () {
+				clickActionSubmit();
+			}, getDelay(rapidDelay), selectors.actionSubmit)
+			.then(function () {
+				if (getResponseMessage().indexOf("purchase") > -1) {
+					reject();
+				} else {
+					resolve();
+				}
+			});
+		}, failCallback, null);
+	});
+}
+
+function travel(x, y) {
+	// console.log("travel", x, y);
+	if (typeof x === "string") {
+		x = parseInt(x, 10);
+	}
+	if (typeof y === "string") {
+		y = parseInt(y, 10);
+	}
+
+	var limit = Math.floor(Math.sqrt(parseInt(window.frames[0].Ntl, 10) / 100)) - 1;
+	var loc = scrapeLocation();
+
 	if (isNaN(limit)) {
 		throw ("no nan");
 	}
-	var loc = scrapeLocation();
 
 	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
 		promise.then(function () {
 			return new Promise(function (resolve, reject) {
-				console.log("teleport loop", loc.x, loc.y);
+				// console.log("travel loop", loc.x, loc.y);
 
 				var point = calculateWarpPoint(limit, loc, {
 						x: x,
 						y: y
 					});
 
-				console.log("moving to ", point);
-
-				getMainFrameElement(selectors.actionsSelect).value = "tele";
-				parent.frames[0].window.updateaction("tele", getMainFrameElement('#general'));
-				setTimeout(function () {
-
-					getMainFrameElement(selectors.target).value = point.x;
-					getMainFrameElement(selectors.other).value = point.y;
-					getMainFrameElement(selectors.actionSubmit).click();
-
-					waitForDOM(window.frames[0].document, selectors.response, null, function () {
-						if (getResponseMessage().indexOf("purchase") > -1) {
-							reject();
-						} else {
-							setTimeout(function () {
-								resolve();
-								teleport(x, y);
-							}, 6000);
-						}
-					}, failCallback, null);
-
-				}, 300);
+				teleport(point.x, point.y)
+				.then(function () {
+					return new Promise(function (resolve, reject) {
+						travel(x, y);
+						resolve();
+					});
+				});
 			});
 		});
 	}
@@ -632,12 +651,12 @@ function walkKingdoms() {
 		promiseChain = promiseChain
 			.then(function () {
 				return new Promise(function (resolve, reject) {
-					teleport(kd.x, kd.y);
+					travel(kd.x, kd.y);
 				});
 			})
 			.then(function () {
 				return new Promise(function (resolve, reject) {
-					if (window.frames[0].Tres >= 190000000) {
+					if (window.frames[0].Tres >= 199000000) {
 						embezzle();
 					}
 				});
@@ -840,7 +859,7 @@ function checkInterrupts(callback) {
 	//if level up buttons
 	else if (rwkState.isTrainingNeeded) {
 		returnMe = train;
-	} else if (rwkState.isBeastActive && getBeastPosition().indexOf("Sur") === -1) {
+	} else if (rwkState.isBeastActive && getBeastPosition().plane === "Sur") {
 		done = true;
 		makeNoise();
 		returnMe = beastHandler;
@@ -850,9 +869,6 @@ function checkInterrupts(callback) {
 	} else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
 		returnMe = embezzle;
 	}
-	/* else if (rwkState.isFightInProgress) {
-	return cast();
-	} */
 	else {
 		returnMe = callback;
 	}
@@ -869,11 +885,6 @@ function makeNoise() {
 		o.stop();
 	}, 200);
 }
-
-// function isNearBeast() {
-// window.frames[0].LocX
-// window.frames[0].LocY
-// }
 
 function calculateWarpPoint(limit, start, end) {
 	console.log("calculateWarpPoint", limit, start, end);
@@ -954,7 +965,7 @@ function moveHandler() {
 	cancelMove = false;
 	var x = prompt("enter target x");
 	var y = prompt("enter target y");
-	teleport(x, y);
+	travel(x, y);
 	this.onclick = cancelMoveHandler;
 	this.textContent = "cancel Move";
 }
@@ -962,7 +973,7 @@ function moveHandler() {
 function cancelMoveHandler() {
 	cancelMove = true;
 	this.onclick = moveHandler;
-	this.textContent = "teleport";
+	this.textContent = "travel";
 }
 
 function stopGrindingHandler() {
@@ -1012,12 +1023,24 @@ function createCraftButton() {
 }
 
 function createMoveButton() {
-	return createButton("btnMove", "Teleport", moveHandler);
+	return createButton("btnMove", "travel", moveHandler);
 }
 
 function createHomeButton() {
 	return createButton("btnHome", "Home", function () {
-		teleport(157, 49);
+		travel(157, 49);
+	});
+}
+
+function createPubButton() {
+	return createButton("btnPub", "Pub", function () {
+		travel(pointsOfInterest.Pub.x, pointsOfInterest.Pub.y);
+	});
+}
+
+function createMinesButton() {
+	return createButton("btnMines", "Mines", function () {
+		travel(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
 	});
 }
 
@@ -1136,6 +1159,8 @@ setTimeout(function () {
 	var moveDiv = document.createElement("div");
 	moveDiv.appendChild(createMoveButton());
 	moveDiv.appendChild(createHomeButton());
+	moveDiv.appendChild(createPubButton());
+	moveDiv.appendChild(createMinesButton());
 
 	div.appendChild(grindDiv);
 	div.appendChild(craftDiv);
@@ -1169,17 +1194,13 @@ setTimeout(function () {
 	AddStyleSheet(
 		"button{padding: 8px; border-radius: .5em; font-size: larger;}"
 		 + "select{padding: 8px; font-size: larger;}"
-		// + "input, select, button{width: calc(100vw - 4%);}"
-		// + selectors.kingdomTable + "{width: 100vw; float: right;}"
-		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)" + "{display: none;}"
-		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)" + "{display: none;}"
-		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)" + "{display: none;}"
-		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
+		 + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(4)" 
+		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(5)" 
+		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(6)" 
+		 + "," + selectors.kingdomTable + ".hideDetails" + " > tbody > tr:nth-child(7)" + "{display: none;}"
 		 + selectors.kingdomTable + " td[width]" + "{display: block;}"
-		// + selectors.kingdomTable + " td " + "{width: 100vw;}"
 		 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
 		 + selectors.playerTable + "," + selectors.kingdomTable + "{display: inline-table; width: 20em;}"
-		// + selectors.playerTable + " td " + "{width: 100vw;}"
 		 + selectors.playerTable + " td[width]" + "{display: block;}"
 		 + "td[background]{display:none;}"
 		 + selectors.playerTable + " tr:nth-child(1)"
@@ -1187,7 +1208,9 @@ setTimeout(function () {
 		 + "," + selectors.kingdomTable + " tr:nth-child(1)"
 		 + "," + selectors.kingdomTable + " tr:nth-child(8)"
 		 + "{display: none;}"
-		// + selectors.windowTable + "{}"
 	);
 
 }, 5000);
+
+
+
