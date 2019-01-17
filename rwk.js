@@ -285,13 +285,13 @@ function getMainFrame() {
 
 function selectOptionByText(selector, text) {
 	var select = getElement(selector);
-	var beforeHTML = select.parent.outerHTML;
+	var beforeHTML = select.parentElement.outerHTML;
 	select.value = getOptionValueByText(selector, text);
 	triggerChange(select);
 
 	return new Promise(function (resolve, reject) {
-		waitForDOM(select.parent, selector, function () {
-			return beforeHTML !== select.parent.outerHTML;
+		waitForDOM(select.parentElement, selector, function () {
+			return beforeHTML !== select.parentElement.outerHTML;
 		}, function () {
 			resolve();
 		}, function () {
@@ -316,8 +316,8 @@ function selectOptionByValue(selector, value) {
 	triggerChange(select);
 
 	return new Promise(function (resolve, reject) {
-		waitForDOM(select.parent, selector, function () {
-			return beforeHTML !== select.parent.outerHTML;
+		waitForDOM(select.parentElement, selector, function () {
+			return beforeHTML !== select.parentElement.outerHTML;
 		}, function () {
 			resolve();
 		}, function () {
@@ -490,7 +490,7 @@ function craft(type, item) {
 	.then(function () {
 		return setTarget(type)
 		.then(function () {
-			return setOther(item);
+			return setOther(item)
 			.then(function () {
 				return resolveAction(function () {
 					clickActionSubmit();
@@ -545,7 +545,10 @@ function findBeast() {
 	var promiseChain = new Promise(function (resolve, reject) {
 			if (isBeastHere()) {
 				getElement(selectors.target).selectedIndex = 2;
-				act().then(function () {
+				resolveAction(function () {
+					clickActionSubmit();
+				}, getDelay(rapidDelay), selectors.actionSubmit)
+				.then(function () {
 					resolve();
 				});
 			} else {
@@ -559,7 +562,9 @@ function findBeast() {
 }
 
 function findBeastResolveHandler() {
-	return act();
+	return resolveAction(function () {
+		clickActionSubmit();
+	}, getDelay(rapidDelay), selectors.actionSubmit);
 }
 
 function findBeastRejectHandler() {
