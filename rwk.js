@@ -30,23 +30,21 @@ var pointsOfInterest = {
 	}
 };
 
-var cssString =
-	 + "button{padding: 8px; border-radius: .5em; font-size: larger;}"
-	 + "select{padding: 8px; font-size: larger;}"
-	 + "body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)"
-	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)"
-	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)"
-	 + ",body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7){display: none;}"
-	 + "body > table > tbody > tr:nth-child(2) > td > table td[width]{display: block;}"
-	 + "body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
-	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table{display: inline-table; width: 20em;}"
-	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]{display: block;}"
-	 + "td[background]{display:none;}"
-	 + "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)"
-	 + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)"
-	 + ",body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)"
-	 + ",body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)"
-	 + "{display: none;}";
+var cssString = "button{padding: 8px; border-radius: .5em; font-size: larger;}"
+	 + " select{padding: 8px; font-size: larger;}"
+	 + " body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)"
+	 + ", body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)"
+	 + ", body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)"
+	 + ", body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7){display: none;}"
+	 + " body > table > tbody > tr:nth-child(2) > td > table td[width]{display: block;}"
+	 + " body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
+	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table{display: inline-table; width: 20em;}"
+	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]{display: block;}"
+	 + " td[background]{display:none;}"
+	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)"
+	 + ", body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)"
+	 + ", body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)"
+	 + ", body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8){display: none;}";
 
 var selectors = {
 	actionDelay: "#s_ActionDelay",
@@ -78,7 +76,8 @@ var selectors = {
 NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
-// var rwkState = getRWKState();
+var rwkState;
+ // = getRWKState();
 //state observers
 function getRWKState() {
 	return {
@@ -109,14 +108,6 @@ function getChatBox() {
 	var returnMe = document.querySelector(selectors.chatBox);
 	if (!returnMe) {
 		returnMe = getMainFrameElement(selectors.chatBox);
-	}
-	return returnMe;
-}
-
-function clickChatSubmit() {
-	var returnMe = document.querySelector(selectors.chatSubmit);
-	if (!returnMe) {
-		returnMe = getMainFrameElement(selectors.chatSubmit);
 	}
 	return returnMe;
 }
@@ -582,7 +573,7 @@ function isBeastHere() {
 }
 
 function teleport(x, y) {
-	console.log("moving to ", point);
+	// console.log("moving to ", point);
 	setAction("Teleport");
 	// parent.frames[0].window.updateaction("tele", getMainFrameElement('#general'));
 
@@ -603,7 +594,7 @@ function teleport(x, y) {
 					resolve();
 				}
 			});
-		}, failCallback, null);
+		}, function(){}, null);
 	});
 }
 
@@ -616,7 +607,7 @@ function travel(x, y) {
 		y = parseInt(y, 10);
 	}
 
-	var limit = Math.floor(Math.sqrt(parseInt(window.frames[0].Ntl, 10) / 100)) - 1;
+	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
 	var loc = scrapeLocation();
 
 	if (isNaN(limit)) {
@@ -984,7 +975,22 @@ function moveHandler() {
 	var y = prompt("enter target y");
 	travel(x, y);
 	this.onclick = cancelMoveHandler;
-	this.textContent = "cancel Move";
+	this.textContent = "cancel travel";
+}
+
+function travelHandler(x,y){
+	cancelMove = false;
+	travel(x, y);
+	var  button = getElement("#btnTravel");
+	button.onclick = cancelTravelHandler;
+	button.textContent = "cancel travel";
+}
+
+function cancelTravelHandler() {
+	cancelMove = true;
+	var  button = getElement("#btnTravel");
+	button.onclick = moveHandler;
+	button.textContent = "travel";
 }
 
 function cancelMoveHandler() {
@@ -1040,24 +1046,24 @@ function createCraftButton() {
 }
 
 function createMoveButton() {
-	return createButton("btnMove", "travel", moveHandler);
+	return createButton("btnTravel", "travel", moveHandler);
 }
 
 function createHomeButton() {
 	return createButton("btnHome", "Home", function () {
-		travel(157, 49);
+		travelHandler(157, 49);
 	});
 }
 
 function createPubButton() {
 	return createButton("btnPub", "Pub", function () {
-		travel(pointsOfInterest.Pub.x, pointsOfInterest.Pub.y);
+		travelHandler(pointsOfInterest.Pub.x, pointsOfInterest.Pub.y);
 	});
 }
 
 function createMinesButton() {
 	return createButton("btnMines", "Mines", function () {
-		travel(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
+		travelHandler(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
 	});
 }
 
@@ -1210,6 +1216,5 @@ setTimeout(function () {
 	AddStyleSheet(cssString);
 
 }, 5000);
-
 
 
