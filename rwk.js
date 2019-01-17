@@ -77,7 +77,7 @@ NodeList.prototype.forEach = Array.prototype.forEach;
 NodeList.prototype.map = Array.prototype.map;
 
 var rwkState;
- // = getRWKState();
+// = getRWKState();
 //state observers
 function getRWKState() {
 	return {
@@ -212,21 +212,21 @@ function waitForDOM(context, selector, testCallback, doneCallback, failCallback,
 }
 
 function setTarget(text) {
-	selectOptionByText(selectors.target, text);
+	return selectOptionByText(selectors.target, text);
 	// updatetarget(g.action.value, this.options[this.selectedIndex].value, g);
 }
 
 function setAction(text) {
-	selectOptionByText(selectors.actionsSelect, text);
+	return selectOptionByText(selectors.actionsSelect, text);
 	// parent.frames[0].window.updateaction(this.options[this.selectedIndex].value,document.getElementById('general'));
 }
 
 function setKingdomAction(text) {
-	selectOptionByText(selectors.kingdomActionsSelect, text);
+	return selectOptionByText(selectors.kingdomActionsSelect, text);
 }
 
 function setOther(text) {
-	selectOptionByText(selectors.other, text);
+	return selectOptionByText(selectors.other, text);
 }
 
 function setOtherA(value) {
@@ -285,9 +285,19 @@ function getMainFrame() {
 
 function selectOptionByText(selector, text) {
 	var select = getElement(selector);
-
+	var beforeHTML = select.parent.outerHTML;
 	select.value = getOptionValueByText(selector, text);
 	triggerChange(select);
+
+	return new Promise(function (resolve, reject) {
+		waitForDOM(select.parent, selector, function () {
+			return beforeHTML !== select.parent.outerHTML;
+		}, function () {
+			resolve();
+		}, function () {
+			reject();
+		}, null);
+	});
 }
 
 function getElement(selector) {
@@ -304,6 +314,16 @@ function selectOptionByValue(selector, value) {
 
 	select.value = value;
 	triggerChange(select);
+
+	return new Promise(function (resolve, reject) {
+		waitForDOM(select.parent, selector, function () {
+			return beforeHTML !== select.parent.outerHTML;
+		}, function () {
+			resolve();
+		}, function () {
+			reject();
+		}, null);
+	});
 }
 
 function triggerChange(element) {
@@ -392,13 +412,10 @@ function say(text) {
 	}, getDelay(newFightDelay), selectors.actionSubmit);
 }
 
-function resolveAction(callback, delay, selector, doneCallback) {
+function resolveAction(callback, delay, selector) {
 	console.log("resolveAction");
 	if (!selector) {
 		selector = selectors.response;
-	}
-	if (!doneCallback) {
-		doneCallback = function () {};
 	}
 	return new Promise(function (resolve, reject) {
 		var response = getResponseMessage();
@@ -410,13 +427,11 @@ function resolveAction(callback, delay, selector, doneCallback) {
 			return r === "" || r !== response || c !== chat;
 		}, function () {
 			rwkState = getRWKState();
-			doneCallback();
 			setTimeout(function () {
 				resolve();
 			}, delay);
 		}, function () {
 			rwkState = getRWKState();
-			doneCallback();
 			setTimeout(function () {
 				resolve();
 			}, delay);
@@ -441,10 +456,12 @@ function train() {
 function destroyItem(name) {
 	console.log("destroy");
 	setAction("DESTROY");
-	selectOptionByValue(selectors.target, getNextUnwantedItem());
-	return resolveAction(function () {
-		clickActionSubmit();
-	}, getDelay(newFightDelay), null);
+	return selectOptionByValue(selectors.target, getNextUnwantedItem())
+	.then(function () {
+		return resolveAction(function () {
+			clickActionSubmit();
+		}, getDelay(newFightDelay), null);
+	});
 }
 
 function cast() {
@@ -454,34 +471,31 @@ function cast() {
 	}, getDelay(rapidDelay));
 }
 
-function act(selector) {
-	console.log("act");
-	return resolveAction(function () {
-		clickActionSubmit();
-	}, getDelay(newFightDelay), selector);
-}
-
 function newFight() {
 	console.log("new fight");
-	setAction("New Fight");
-	setTarget(getMainFrameElement("#selectMonster").value);
-	return resolveAction(function () {
-		clickActionSubmit();
-	}, getDelay(newFightDelay), selectors.castButton);
+	return setAction("New Fight").then(function () {
+		return setTarget(getMainFrameElement("#selectMonster").value)
+		.then(function () {
+			return resolveAction(function () {
+				clickActionSubmit();
+			}, getDelay(newFightDelay), selectors.castButton);
+		});
+	});
 }
 
 function craft(type, item) {
 	console.log("craft", item);
-	return new Promise(function (resolve, reject) {
-		var selectCraftable = getMainFrameElement("#selectCraftable");
-		setAction("Craft");
-		setTimeout(function () {
-			setTarget(type);
-			setTimeout(function () {
-				setOther(item);
-				resolveAction(function () {
+	var selectCraftable = getMainFrameElement("#selectCraftable");
+	return setAction("Craft")
+	.then(function () {
+		return setTarget(type)
+		.then(function () {
+			return setOther(item);
+			.then(function () {
+				return resolveAction(function () {
 					clickActionSubmit();
-				}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length), null, function () {
+				}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length), null)
+				.then(function () {
 					if (isTrivial()) {
 						selectCraftable.selectedIndex += 1;
 					}
@@ -490,22 +504,20 @@ function craft(type, item) {
 					} else {
 						resolve();
 					}
-				}, 1000);
-			}, 300);
-		}, 300);
+				});
+			});
+		});
 	});
 }
 
 function sell(item) {
 	console.log("sell");
-	return new Promise(function (resolve, reject) {
-		setAction("Sell");
-		setTarget(item);
-		act();
-		setTimeout(function () {
-			resolve();
-		}, newFightDelay * 2);
-	});
+	setAction("Sell");
+	setTarget(item);
+	clickActionSubmit();
+	return resolveAction(function () {
+		clickActionSubmit();
+	}, (newFightDelay * 2));
 }
 
 function beastHandler() {
@@ -594,7 +606,7 @@ function teleport(x, y) {
 					resolve();
 				}
 			});
-		}, function(){}, null);
+		}, function () {}, null);
 	});
 }
 
@@ -722,9 +734,7 @@ function craftAndSell() {
 	var item = getMainFrameElement("#selectCraftable").value;
 	return craft(type, item).then(function () {
 		return new Promise(function (resolve, reject) {
-			return sell(item).then(function () {
-				resolve();
-			});
+			return sell(item);
 		});
 	});
 }
@@ -978,17 +988,17 @@ function moveHandler() {
 	this.textContent = "cancel travel";
 }
 
-function travelHandler(x,y){
+function travelHandler(x, y) {
 	cancelMove = false;
 	travel(x, y);
-	var  button = getElement("#btnTravel");
+	var button = getElement("#btnTravel");
 	button.onclick = cancelTravelHandler;
 	button.textContent = "cancel travel";
 }
 
 function cancelTravelHandler() {
 	cancelMove = true;
-	var  button = getElement("#btnTravel");
+	var button = getElement("#btnTravel");
 	button.onclick = moveHandler;
 	button.textContent = "travel";
 }
@@ -1216,5 +1226,3 @@ setTimeout(function () {
 	AddStyleSheet(cssString);
 
 }, 5000);
-
-
