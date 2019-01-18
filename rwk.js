@@ -194,7 +194,7 @@ function waitForDOM(context, selector, testCallback, doneCallback, failCallback,
 	}
 	if (!endTime) {
 		endTime = new Date();
-		endTime = endTime.setSeconds(endTime.getSeconds() + 15);
+		endTime = endTime.setSeconds(endTime.getSeconds() + 2);
 	}
 
 	element = context.querySelector(selector);
@@ -204,7 +204,7 @@ function waitForDOM(context, selector, testCallback, doneCallback, failCallback,
 		return doneCallback(testResult);
 	} else if (Date.now() <= endTime) {
 		setTimeout(function () {
-			return waitForDOM(context, selector, testCallback, doneCallback, endTime);
+			return waitForDOM(context, selector, testCallback, doneCallback, failCallback, endTime);
 		}, 100);
 	} else {
 		return failCallback();
@@ -286,12 +286,15 @@ function getMainFrame() {
 function selectOptionByText(selector, text) {
 	var select = getElement(selector);
 	var beforeHTML = select.parentElement.outerHTML;
-	select.value = getOptionValueByText(selector, text);
+	var val = getOptionValueByText(selector, text)
+		var skipTest = select.value === val;
+	select.value = val;
+
 	triggerChange(select);
 
 	return new Promise(function (resolve, reject) {
 		waitForDOM(select.parentElement, selector, function () {
-			return beforeHTML !== select.parentElement.outerHTML;
+			return (skipTest || beforeHTML !== select.parentElement.outerHTML);
 		}, function () {
 			resolve();
 		}, function () {
@@ -335,6 +338,7 @@ function triggerChange(element) {
 		element.fireEvent("onchange");
 	}
 }
+
 function getOptionValueByText(selector, text) {
 	var returnMe = null;
 	var select = getElement(selector);
@@ -419,12 +423,16 @@ function resolveAction(callback, delay, selector) {
 	}
 	return new Promise(function (resolve, reject) {
 		var response = getResponseMessage();
-		var chat = getChat();
+		var chat = getChat().outerHTML;
 		callback();
-		waitForDOM(getMainFrame(), selector, function () {
-			var r = getResponseMessage();
-			var c = getChat();
-			return r === "" || r !== response || c !== chat;
+		waitForDOM(getMainFrame(), selector, function (context, selector, element) {
+			if (element) {
+				var r = getResponseMessage();
+				var c = getChat().outerHTML;
+				return r === "" || r !== response || c !== chat;
+			} else {
+				return false;
+			}
 		}, function () {
 			rwkState = getRWKState();
 			setTimeout(function () {
@@ -460,7 +468,7 @@ function destroyItem(name) {
 	.then(function () {
 		return resolveAction(function () {
 			clickActionSubmit();
-		}, getDelay(newFightDelay), null);
+		}, getDelay(newFightDelay), selectors.response);
 	});
 }
 
@@ -468,7 +476,7 @@ function cast() {
 	console.log("cast");
 	return resolveAction(function () {
 		clickCast();
-	}, getDelay(rapidDelay));
+	}, getDelay(rapidDelay), selectors.response);
 }
 
 function newFight() {
@@ -980,6 +988,7 @@ function getDelay(value) {
 		returnMe *= 2;
 	}
 	returnMe *= 1 - (haste / 200);
+	console.log("getDelay", returnMe);
 	return returnMe;
 }
 
@@ -1079,6 +1088,12 @@ function createPubButton() {
 function createMinesButton() {
 	return createButton("btnMines", "Mines", function () {
 		travelHandler(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
+	});
+}
+
+function createWalkKingdomsButton() {
+	return createButton("btnWalkKingdoms", "Walk Kingdoms", function () {
+		walkKingdoms();
 	});
 }
 
@@ -1199,6 +1214,7 @@ setTimeout(function () {
 	moveDiv.appendChild(createHomeButton());
 	moveDiv.appendChild(createPubButton());
 	moveDiv.appendChild(createMinesButton());
+	moveDiv.appendChild(createWalkKingdomsButton());
 
 	div.appendChild(grindDiv);
 	div.appendChild(craftDiv);
