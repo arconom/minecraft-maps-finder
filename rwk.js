@@ -285,7 +285,7 @@ function getMainFrame() {
 
 function selectOptionByText(selector, text) {
 	var select = getElement(selector);
-	var beforeHTML = select.parentElement.outerHTML;
+	var beforeHTML = select.parentElement.parentElement.outerHTML;
 	var val = getOptionValueByText(selector, text)
 		var skipTest = select.value === val;
 	select.value = val;
@@ -294,7 +294,7 @@ function selectOptionByText(selector, text) {
 
 	return new Promise(function (resolve, reject) {
 		waitForDOM(select.parentElement, selector, function () {
-			return (skipTest || beforeHTML !== select.parentElement.outerHTML);
+			return (skipTest || beforeHTML !== select.parentElement.parentElement.outerHTML);
 		}, function () {
 			resolve();
 		}, function () {
@@ -312,15 +312,16 @@ function getElement(selector) {
 	return element;
 }
 
-function selectOptionByValue(selector, value) {
+function selectOptionByValue(selector, value, skip) {
 	var select = getElement(selector);
-
+	var beforeHTML = select.parentElement.parentElement.outerHTML;
+		var skipTest = select.value === value;
 	select.value = value;
 	triggerChange(select);
 
 	return new Promise(function (resolve, reject) {
 		waitForDOM(select.parentElement, selector, function () {
-			return beforeHTML !== select.parentElement.outerHTML;
+			return skip || skipTest || beforeHTML !== select.parentElement.parentElement.outerHTML;
 		}, function () {
 			resolve();
 		}, function () {
@@ -464,7 +465,7 @@ function train() {
 function destroyItem(name) {
 	console.log("destroy");
 	setAction("DESTROY");
-	return selectOptionByValue(selectors.target, getNextUnwantedItem())
+	return selectOptionByValue(selectors.target, getNextUnwantedItem(), true)
 	.then(function () {
 		return resolveAction(function () {
 			clickActionSubmit();
