@@ -194,7 +194,7 @@ function waitForDOM(context, selector, testCallback, doneCallback, failCallback,
 	}
 	if (!endTime) {
 		endTime = new Date();
-		endTime = endTime.setSeconds(endTime.getSeconds() + 2);
+		endTime = endTime.setSeconds(endTime.getSeconds() + 10);
 	}
 
 	element = context.querySelector(selector);
@@ -315,7 +315,7 @@ function getElement(selector) {
 function selectOptionByValue(selector, value, skip) {
 	var select = getElement(selector);
 	var beforeHTML = select.parentElement.parentElement.outerHTML;
-		var skipTest = select.value === value;
+	var skipTest = select.value === value;
 	select.value = value;
 	triggerChange(select);
 
@@ -625,41 +625,39 @@ function teleport(x, y) {
 }
 
 function travel(x, y) {
-	// console.log("travel", x, y);
-	if (typeof x === "string") {
-		x = parseInt(x, 10);
-	}
-	if (typeof y === "string") {
-		y = parseInt(y, 10);
-	}
 
-	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
-	var loc = scrapeLocation();
+	return new Promise(function (resolve, reject) {
 
-	if (isNaN(limit)) {
-		throw ("no nan");
-	}
+		// console.log("travel", x, y);
+		if (typeof x === "string") {
+			x = parseInt(x, 10);
+		}
+		if (typeof y === "string") {
+			y = parseInt(y, 10);
+		}
 
-	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
-		promise.then(function () {
-			return new Promise(function (resolve, reject) {
-				// console.log("travel loop", loc.x, loc.y);
+		var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
+		var loc = scrapeLocation();
 
-				var point = calculateWarpPoint(limit, loc, {
-						x: x,
-						y: y
-					});
+		if (isNaN(limit)) {
+			throw ("no nan");
+		}
 
-				teleport(point.x, point.y)
-				.then(function () {
-					return new Promise(function (resolve, reject) {
-						travel(x, y);
-						resolve();
-					});
+		if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
+			// console.log("travel loop", loc.x, loc.y);
+
+			var point = calculateWarpPoint(limit, loc, {
+					x: x,
+					y: y
 				});
+
+			teleport(point.x, point.y)
+			.then(function () {
+				return travel(x, y);
+				resolve();
 			});
-		});
-	}
+		}
+	});
 }
 
 function walkKingdoms() {
@@ -788,6 +786,8 @@ function wantItem(text) {
 	var found = false;
 
 	var wantThese = [
+		"Enhanced Nock",
+		"Annullment",
 		"Believer",
 		"Cara",
 		"Death Spike",
