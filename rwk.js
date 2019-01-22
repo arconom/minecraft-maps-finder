@@ -734,7 +734,7 @@ function grind() {
 
 function embezzle() {
 	setKingdomAction("Embezzle");
-	setKingdomOtherA("260000000");
+	setKingdomOtherA("254000000");
 	return resolveAction(function () {
 		clickKingdomActionSubmit();
 	}, getDelay(newFightDelay), selectors.kingdomActionSubmit);
