@@ -656,6 +656,8 @@ function travel(x, y) {
 				return travel(x, y);
 				resolve();
 			});
+		} else {
+			resolve();
 		}
 	});
 }
@@ -683,23 +685,19 @@ function walkKingdoms() {
 	kds.forEach(function (kd) {
 		promiseChain = promiseChain
 			.then(function () {
-				return new Promise(function (resolve, reject) {
-					travel(kd.x, kd.y);
-				});
-			})
+				return travel(kd.x, kd.y);
+			});
+		promiseChain = promiseChain
 			.then(function () {
-				return new Promise(function (resolve, reject) {
-					if (window.frames[0].Tres >= 199000000) {
-						embezzle();
-					}
-				});
-			})
+				if (window.frames[0].Tres >= 199000000) {
+					return embezzle();
+				}
+			});
+		promiseChain = promiseChain
 			.then(function () {
-				return new Promise(function (resolve, reject) {
-					if (window.frames[0].Gold > 170000000) {
-						buyRune();
-					}
-				});
+				if (window.frames[0].Gold > 170000000) {
+					buyRune();
+				}
 			});
 	});
 
