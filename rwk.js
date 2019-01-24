@@ -511,6 +511,7 @@ function craft(type, item) {
 					if (craftingFailed()) {
 						reject();
 					} else {
+						console.log("resolving craft");
 						resolve();
 					}
 				});
@@ -547,6 +548,7 @@ function beastHandler() {
 }
 
 function findBeast() {
+	console.log("findBeast");
 	setAction("Battle");
 
 	var dirs = [3, 0, 2, 2, 1, 1, 2, 2];
@@ -558,6 +560,7 @@ function findBeast() {
 					clickActionSubmit();
 				}, getDelay(rapidDelay), selectors.actionSubmit)
 				.then(function () {
+					console.log("resolving findBeast");
 					resolve();
 				});
 			} else {
@@ -577,6 +580,7 @@ function findBeastResolveHandler() {
 }
 
 function findBeastRejectHandler() {
+	console.log("findBeastRejectHandler");
 	return new Promise(function (resolve, reject) {
 		move(dirs[i])
 		.then(function () {
@@ -584,6 +588,7 @@ function findBeastRejectHandler() {
 				getElement(selectors.target).selectedIndex = 2;
 				// setTarget("Beast");
 				// act().then(function(){
+				console.log("resolving findBeastRejectHandler");
 				resolve();
 				// });
 			} else {
@@ -617,6 +622,7 @@ function teleport(x, y) {
 				if (getResponseMessage().indexOf("purchase") > -1) {
 					reject();
 				} else {
+					console.log("resolving teleport", x, y);
 					resolve();
 				}
 			});
@@ -624,45 +630,68 @@ function teleport(x, y) {
 	});
 }
 
-function travel(x, y) {
+function buyRune() {
+	setKingdomAction("Runes");
 
 	return new Promise(function (resolve, reject) {
+		waitForDOM(window.frames[0].document, selectors.kingdomOtherA, null, function () {
+			setKingdomOtherA("1");
 
-		// console.log("travel", x, y);
-		if (typeof x === "string") {
-			x = parseInt(x, 10);
-		}
-		if (typeof y === "string") {
-			y = parseInt(y, 10);
-		}
-
-		var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
-		var loc = scrapeLocation();
-
-		if (isNaN(limit)) {
-			throw ("no nan");
-		}
-
-		if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
-			// console.log("travel loop", loc.x, loc.y);
-
-			var point = calculateWarpPoint(limit, loc, {
-					x: x,
-					y: y
-				});
-
-			teleport(point.x, point.y)
+			resolveAction(function () {
+				clickActionSubmit();
+			}, getDelay(newFightDelay), selectors.actionSubmit)
 			.then(function () {
-				return travel(x, y);
+				console.log("resolving buy rune");
 				resolve();
 			});
-		} else {
-			resolve();
-		}
+		}, function () {}, null);
 	});
 }
 
+function travel(x, y) {
+	console.log("travel", x, y);
+	// return new Promise(function (resolve, reject) {
+	// });
+
+	if (typeof x === "string") {
+		x = parseInt(x, 10);
+	}
+	if (typeof y === "string") {
+		y = parseInt(y, 10);
+	}
+
+	var limit = Math.floor(Math.sqrt(parseInt(Ntl, 10) / 100)) - 1;
+	var loc = scrapeLocation();
+
+	if (isNaN(limit)) {
+		throw ("no nan");
+	}
+
+	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
+		// console.log("travel loop", loc.x, loc.y);
+
+		var point = calculateWarpPoint(limit, loc, {
+				x: x,
+				y: y
+			});
+
+		return teleport(point.x, point.y)
+		.then(function () {
+			return travel(x, y);
+			// console.log("resolving travel", x, y);
+			// resolve();
+		});
+	} else {
+		console.log("resolving travel", x, y);
+		// resolve();
+		return new Promise(function (resolve, reject) {
+			resolve();
+		});
+	}
+}
+
 function walkKingdoms() {
+	console.log("walkKingdoms");
 	var kds = [{
 			x: 157,
 			y: 49,
@@ -689,18 +718,25 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (window.frames[0].Tres >= 199000000) {
+				if (/* window.frames[0]. */Tres >= 199000000) {
 					return embezzle();
+				} else {
+					return new Promise(function (resolve, reject) {
+						resolve();
+					});
 				}
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (window.frames[0].Gold > 170000000) {
-					buyRune();
+				if (/* window.frames[0]. */Gold > 170000000) {
+					return buyRune();
+				} else {
+					return new Promise(function (resolve, reject) {
+						resolve();
+					});
 				}
 			});
 	});
-
 }
 
 function warpToBeast() {
