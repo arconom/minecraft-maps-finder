@@ -638,7 +638,7 @@ function buyRune() {
 			setKingdomOtherA("1");
 
 			resolveAction(function () {
-				clickActionSubmit();
+				clickKingdomActionSubmit();
 			}, getDelay(newFightDelay), selectors.actionSubmit)
 			.then(function () {
 				console.log("resolving buy rune");
@@ -718,7 +718,7 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (/* window.frames[0]. */Tres >= 199000000) {
+				if (/* window.frames[0]. */ parseInt(Tres, 10) >= 1990000000) {
 					return embezzle();
 				} else {
 					return new Promise(function (resolve, reject) {
@@ -728,7 +728,7 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (/* window.frames[0]. */Gold > 170000000) {
+				if (/* window.frames[0]. */ parseInt(Gold, 10) > 1700000000) {
 					return buyRune();
 				} else {
 					return new Promise(function (resolve, reject) {
@@ -1029,6 +1029,7 @@ function getDelay(value) {
 
 //UI setup
 function moveHandler() {
+	isApex = getApexStatus();
 	cancelMove = false;
 	var x = prompt("enter target x");
 	var y = prompt("enter target y");
@@ -1110,24 +1111,28 @@ function createMoveButton() {
 
 function createHomeButton() {
 	return createButton("btnHome", "Home", function () {
+		isApex = getApexStatus();
 		travelHandler(157, 49);
 	});
 }
 
 function createPubButton() {
 	return createButton("btnPub", "Pub", function () {
+		isApex = getApexStatus();
 		travelHandler(pointsOfInterest.Pub.x, pointsOfInterest.Pub.y);
 	});
 }
 
 function createMinesButton() {
 	return createButton("btnMines", "Mines", function () {
+		isApex = getApexStatus();
 		travelHandler(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
 	});
 }
 
 function createWalkKingdomsButton() {
 	return createButton("btnWalkKingdoms", "Walk Kingdoms", function () {
+		isApex = getApexStatus();
 		walkKingdoms();
 	});
 }
