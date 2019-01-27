@@ -571,31 +571,31 @@ function findBeast() {
 	for (var i = 0; i < dirs.length; i++) {
 		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
 	}
-}
 
-function findBeastResolveHandler() {
-	return resolveAction(function () {
-		clickActionSubmit();
-	}, getDelay(rapidDelay), selectors.actionSubmit);
-}
+	function findBeastResolveHandler() {
+		return resolveAction(function () {
+			clickActionSubmit();
+		}, getDelay(rapidDelay), selectors.actionSubmit);
+	}
 
-function findBeastRejectHandler() {
-	console.log("findBeastRejectHandler");
-	return new Promise(function (resolve, reject) {
-		move(dirs[i])
-		.then(function () {
-			if (isBeastHere()) {
-				getElement(selectors.target).selectedIndex = 2;
-				// setTarget("Beast");
-				// act().then(function(){
-				console.log("resolving findBeastRejectHandler");
-				resolve();
-				// });
-			} else {
-				reject();
-			}
+	function findBeastRejectHandler() {
+		console.log("findBeastRejectHandler");
+		return new Promise(function (resolve, reject) {
+			move(dirs[i])
+			.then(function () {
+				if (isBeastHere()) {
+					getElement(selectors.target).selectedIndex = 2;
+					// setTarget("Beast");
+					// act().then(function(){
+					console.log("resolving findBeastRejectHandler");
+					resolve();
+					// });
+				} else {
+					reject();
+				}
+			});
 		});
-	});
+	}
 }
 
 function isBeastHere() {
