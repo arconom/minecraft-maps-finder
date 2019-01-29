@@ -551,7 +551,7 @@ function findBeast() {
 	console.log("findBeast");
 	setAction("Battle");
 
-	var dirs = [3, 0, 2, 2, 1, 1, 2, 2];
+	var dirs = [3, 0, 2, 2, 1, 1, 3, 3];
 	var returnMe = null;
 	var promiseChain = new Promise(function (resolve, reject) {
 			if (isBeastHere()) {
@@ -821,7 +821,7 @@ function wantItem(text) {
 
 	var wantThese = [
 		"Enhanced Nock",
-		"Annullment",
+		"Annulment",
 		"Believer",
 		"Cara",
 		"Death Spike",
