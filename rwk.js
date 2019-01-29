@@ -10,7 +10,7 @@ var promise = new Promise(function (resolve, reject) {
 	});
 
 var isApex = true;
-var haste = 30;
+var haste = 58;
 var standardDelay = 10000, reviveDelay = 22000, rapidDelay = 6000, newFightDelay = 1000;
 var counter = 0;
 var done = false;
@@ -568,34 +568,32 @@ function findBeast() {
 			}
 		});
 
-	for (var i = 0; i < dirs.length; i++) {
-		promiseChain = promiseChain.then(findBeastResolveHandler, findBeastRejectHandler);
-	}
-
-	function findBeastResolveHandler() {
-		return resolveAction(function () {
-			clickActionSubmit();
-		}, getDelay(rapidDelay), selectors.actionSubmit);
-	}
-
-	function findBeastRejectHandler() {
-		console.log("findBeastRejectHandler");
-		return new Promise(function (resolve, reject) {
-			move(dirs[i])
-			.then(function () {
-				if (isBeastHere()) {
-					getElement(selectors.target).selectedIndex = 2;
-					// setTarget("Beast");
-					// act().then(function(){
-					console.log("resolving findBeastRejectHandler");
-					resolve();
-					// });
-				} else {
-					reject();
-				}
+	dirs.forEach(function(dir) {
+		promiseChain = promiseChain.then(
+			function() {
+				return resolveAction(function () {
+					clickActionSubmit();
+				}, getDelay(rapidDelay), selectors.actionSubmit);
+			},
+			function() {
+				console.log("findBeastRejectHandler");
+				return new Promise(function (resolve, reject) {
+					move(dir)
+					.then(function () {
+						if (isBeastHere()) {
+							getElement(selectors.target).selectedIndex = 2;
+							// setTarget("Beast");
+							// act().then(function(){
+							console.log("resolving findBeastRejectHandler");
+							resolve();
+							// });
+						} else {
+							reject();
+						}
+					});
+				});
 			});
-		});
-	}
+	});
 }
 
 function isBeastHere() {
