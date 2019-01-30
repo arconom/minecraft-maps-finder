@@ -1016,7 +1016,7 @@ function getLoopDelayValue() {
 }
 
 function getDelay(value) {
-	var returnMe = value;
+	var returnMe = value / 2;
 	if (isApex) {
 		returnMe *= 2;
 	}
