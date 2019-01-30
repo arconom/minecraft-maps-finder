@@ -533,17 +533,10 @@ function sell(item) {
 function beastHandler() {
 	console.log("beastHandler");
 	return new Promise(function (resolve, reject) {
-		warpToBeast();
-
-		setAction("Battle");
-		// setTarget("Beast");
-		setTimeout(function () {
-			findBeast()
-			// .then(function () {
-			// resolve();
-			// })
-		;
-		}, getDelay(standardDelay / 2));
+		warpToBeast()
+		.then(function () {
+			findBeast();
+		});
 	});
 }
 
@@ -568,14 +561,14 @@ function findBeast() {
 			}
 		});
 
-	dirs.forEach(function(dir) {
+	dirs.forEach(function (dir) {
 		promiseChain = promiseChain.then(
-			function() {
+				function () {
 				return resolveAction(function () {
 					clickActionSubmit();
 				}, getDelay(rapidDelay), selectors.actionSubmit);
 			},
-			function() {
+				function () {
 				console.log("findBeastRejectHandler");
 				return new Promise(function (resolve, reject) {
 					move(dir)
@@ -647,9 +640,7 @@ function buyRune() {
 }
 
 function travel(x, y) {
-	console.log("travel", x, y);
-	// return new Promise(function (resolve, reject) {
-	// });
+	// console.log("travel", x, y);
 
 	if (typeof x === "string") {
 		x = parseInt(x, 10);
@@ -666,8 +657,6 @@ function travel(x, y) {
 	}
 
 	if (((loc.x !== x) || (loc.y !== y)) && !cancelMove) {
-		// console.log("travel loop", loc.x, loc.y);
-
 		var point = calculateWarpPoint(limit, loc, {
 				x: x,
 				y: y
@@ -676,12 +665,9 @@ function travel(x, y) {
 		return teleport(point.x, point.y)
 		.then(function () {
 			return travel(x, y);
-			// console.log("resolving travel", x, y);
-			// resolve();
 		});
 	} else {
 		console.log("resolving travel", x, y);
-		// resolve();
 		return new Promise(function (resolve, reject) {
 			resolve();
 		});
@@ -738,8 +724,20 @@ function walkKingdoms() {
 }
 
 function warpToBeast() {
-	say("/bnb");
-	rwkState.hasWarped = true;
+	say("/bnb")
+	.then(function () {
+		return new Promise(
+			function (resolve, reject) {
+			if (getResponseMessage().indexOf("You do not have the gear") > -1) {
+				reject();
+			} else {
+				rwkState.hasWarped = true;
+				resolve();
+			}
+		});
+	}, function () {
+		return Promise.reject();
+	});
 }
 
 function logBody() {
@@ -1033,28 +1031,31 @@ function moveHandler() {
 	var y = prompt("enter target y");
 	travel(x, y);
 	this.onclick = cancelMoveHandler;
-	this.textContent = "cancel travel";
+	this.textContent = "Cancel travel";
 }
 
 function travelHandler(x, y) {
 	cancelMove = false;
-	travel(x, y);
 	var button = getElement("#btnTravel");
+	travel(x, y)
+	.then(function () {
+		button.textContent = "Travel";
+	}, function () {});
 	button.onclick = cancelTravelHandler;
-	button.textContent = "cancel travel";
+	button.textContent = "Cancel travel";
 }
 
 function cancelTravelHandler() {
 	cancelMove = true;
 	var button = getElement("#btnTravel");
 	button.onclick = moveHandler;
-	button.textContent = "travel";
+	button.textContent = "Travel";
 }
 
 function cancelMoveHandler() {
 	cancelMove = true;
 	this.onclick = moveHandler;
-	this.textContent = "travel";
+	this.textContent = "Travel";
 }
 
 function stopGrindingHandler() {
