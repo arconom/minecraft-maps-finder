@@ -19,7 +19,7 @@ var pointsOfInterest = {
 	Pub: {
 		x: 150,
 		y: 145
-	},
+	}, 
 	Puddle: {
 		x: 140,
 		y: 190
@@ -907,8 +907,13 @@ function checkInterrupts(callback) {
 	var returnMe;
 	if (rwkState.isSecurityResponseNeeded) {
 		done = true;
+		grindButton.onclick = startGrindingHandler;
+		grindButton.textContent = "Grind";
+		craftButton.onclick = startGrindingHandler;
+		craftButton.textContent = "Craft";
+
 		makeNoise();
-		alert("security");
+		// alert("security");
 	}
 	//if dead revive
 	else if (rwkState.isReviveNeeded) {
@@ -924,6 +929,10 @@ function checkInterrupts(callback) {
 		returnMe = train;
 	} else if (rwkState.isBeastActive && getBeastPosition().plane === "Sur") {
 		done = true;
+		grindButton.onclick = startGrindingHandler;
+		grindButton.textContent = "Grind";
+		craftButton.onclick = startGrindingHandler;
+		craftButton.textContent = "Craft";
 		makeNoise();
 		returnMe = beastHandler;
 	} else if (rwkState.isInventoryFull) {
@@ -1232,6 +1241,8 @@ function CreateStyleSheet(content) {
 
 setPassword("1qaz!QAZ2wsx@WSX");
 clickLogin();
+		var grindButton;
+		var craftButton;
 
 setTimeout(function () {
 
@@ -1239,12 +1250,15 @@ setTimeout(function () {
 	var div = document.createElement("div");
 	div.cssClass = "addedDiv";
 
+	grindButton = createGrindButton();
+	craftButton = createCraftButton();
+	
 	var grindDiv = document.createElement("div");
-	grindDiv.appendChild(createGrindButton());
+	grindDiv.appendChild(grindButton);
 	grindDiv.appendChild(createMonsterSelect());
 
 	var craftDiv = document.createElement("div");
-	craftDiv.appendChild(createCraftButton());
+	craftDiv.appendChild(craftButton);
 	craftDiv.appendChild(createCraftTypeSelect());
 	craftDiv.appendChild(createCraftSelect());
 
@@ -1286,3 +1300,8 @@ setTimeout(function () {
 	AddStyleSheet(cssString);
 
 }, 5000);
+
+
+
+
+
