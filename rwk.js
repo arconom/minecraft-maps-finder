@@ -46,7 +46,7 @@ var cssString = "button{padding: 8px; border-radius: .5em; font-size: larger;}"
 	 + ", body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)"
 	 + ", body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8){display: none;}"
 	 + ", #s_Chat{width: 70vw;}"
-	 + "body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table{width: 70vw;}"
+	 + "body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table{width: 40em;}"
 	 + "body > table > tbody > tr:nth-child(5) > td > table{display: none;}"
 	 + "body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td{display: inline;}"
 	 ;
