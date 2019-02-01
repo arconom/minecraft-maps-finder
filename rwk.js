@@ -613,7 +613,7 @@ function teleport(x, y) {
 
 			resolveAction(function () {
 				clickActionSubmit();
-			}, getDelay(rapidDelay), selectors.actionSubmit)
+			}, getDelay(standardDelay), selectors.actionSubmit)
 			.then(function () {
 				if (getResponseMessage().indexOf("purchase") > -1) {
 					reject();
@@ -768,6 +768,7 @@ function grind() {
 }
 
 function embezzle() {
+	console.log("embezzle");
 	setKingdomAction("Embezzle");
 	setKingdomOtherA("254000000");
 	return resolveAction(function () {
@@ -1273,10 +1274,19 @@ setTimeout(function () {
 	moveDiv.appendChild(createPubButton());
 	moveDiv.appendChild(createMinesButton());
 	moveDiv.appendChild(createWalkKingdomsButton());
+	moveDiv.appendChild(createButton("btnBeast", "Beast", function(){warpToBeast();}));
 
+	var moveDiv2 = document.createElement("div");
+	moveDiv2.appendChild(createButton("btnNorth", "North", function(){moveNorth();}));
+	moveDiv2.appendChild(createButton("btnSouth", "South", function(){moveSouth();}));
+	moveDiv2.appendChild(createButton("btnEast", "East", function(){moveEast();}));
+	moveDiv2.appendChild(createButton("btnWest", "West", function(){moveWest();}));
+
+	
 	div.appendChild(grindDiv);
 	div.appendChild(craftDiv);
 	div.appendChild(moveDiv);
+	div.appendChild(moveDiv2);
 
 	center.insertAdjacentElement("afterend", div);
 
