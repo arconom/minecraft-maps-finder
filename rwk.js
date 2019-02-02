@@ -1261,13 +1261,13 @@ function setStyleAttributes() {
 	})
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table td[width]")
 	.style += " display: block; ";
@@ -1283,17 +1283,17 @@ function setStyleAttributes() {
 
 	getMainFrameElements("td[background]")
 	.forEach(function (x) {
-		x.style += " display:none; ";
+		x.style = " display:none; ";
 	})
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)")
-	.style += " display: none; ";
+	.style = " display: none; ";
 
 	getMainFrameElement("#s_Chat")
 	.style += " width: 70vw; ";
@@ -1305,7 +1305,7 @@ function setStyleAttributes() {
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(5) > td > table")
 	.forEach(function (x) {
-		x.style += " display: none; ";
+		x.style = " display: none; ";
 	})
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td")
