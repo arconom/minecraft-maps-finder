@@ -1295,12 +1295,9 @@ function setStyleAttributes() {
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)")
 	.style = " display: none; ";
 
-	getMainFrameElement("#s_Chat")
-	.style += " width: 70vw; ";
-
 	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
 	.forEach(function (x) {
-		x.style += " width: 40em; ";
+		x.style += " width: 20em; ";
 	})
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(5) > td > table")
