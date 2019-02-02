@@ -751,9 +751,10 @@ function logBody() {
 
 function grind() {
 	var returnMe;
-	if (rwkState.isInventoryFull) {
-		returnMe = destroyItem();
-	} else if (rwkState.isFightInProgress) {
+	// if (rwkState.isInventoryFull) {
+		// returnMe = destroyItem();
+	// } else 
+		if (rwkState.isFightInProgress) {
 		returnMe = cast();
 	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
 		returnMe = newFight();
@@ -944,8 +945,8 @@ function checkInterrupts(callback) {
 	} else if (rwkState.isInventoryFull) {
 		// done = true;
 		returnMe = destroyItem;
-	} else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
-		returnMe = embezzle;
+	// } else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
+		// returnMe = embezzle;
 	} else {
 		returnMe = callback;
 	}
