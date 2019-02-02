@@ -19,7 +19,7 @@ var pointsOfInterest = {
 	Pub: {
 		x: 150,
 		y: 145
-	}, 
+	},
 	Puddle: {
 		x: 140,
 		y: 190
@@ -48,8 +48,7 @@ var cssString = "button{padding: 8px; border-radius: .5em; font-size: larger;}"
 	 + ", #s_Chat{width: 70vw;}"
 	 + "body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table{width: 40em;}"
 	 + "body > table > tbody > tr:nth-child(5) > td > table{display: none;}"
-	 + "body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td{display: inline;}"
-	 ;
+	 + "body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td{display: inline;}";
 
 var selectors = {
 	actionDelay: "#s_ActionDelay",
@@ -267,6 +266,10 @@ function clickMainFrameElement(selector) {
 
 function getMainFrameElement(selector) {
 	return getMainFrame().querySelector(selector);
+}
+
+function getMainFrameElements(selector) {
+	return getMainFrame().querySelectorAll(selector);
 }
 
 function isMainFrameElementPresent(selector) {
@@ -752,9 +755,9 @@ function logBody() {
 function grind() {
 	var returnMe;
 	// if (rwkState.isInventoryFull) {
-		// returnMe = destroyItem();
-	// } else 
-		if (rwkState.isFightInProgress) {
+	// returnMe = destroyItem();
+	// } else
+	if (rwkState.isFightInProgress) {
 		returnMe = cast();
 	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
 		returnMe = newFight();
@@ -945,7 +948,7 @@ function checkInterrupts(callback) {
 	} else if (rwkState.isInventoryFull) {
 		// done = true;
 		returnMe = destroyItem;
-	// } else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
+		// } else if (rwkState.isKingdomOwnedByMe && rwkState.isTreasuryFull) {
 		// returnMe = embezzle;
 	} else {
 		returnMe = callback;
@@ -1246,10 +1249,76 @@ function CreateStyleSheet(content) {
 	return style;
 }
 
+// because Tampermonkey doesn't do stylesheets
+function setStyleAttributes() {
+	getMainFrameElements("button")
+	.forEach(function (x) {
+		x.style = "{padding: 8px; border-radius: .5em; font-size: larger;}";
+	})
+	getMainFrameElements("select")
+	.forEach(function (x) {
+		x.style = "{padding: 8px; font-size: larger;}";
+	})
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7)")
+	.style = "{display: none;}";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table td[width]")
+	.style = "{display: block;}";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2)")
+	.style = "{display: inline-block;}";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
+	.style = "{display: inline-table; width: 10em;}";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
+	.style = "{display: block;}";
+
+	getMainFrameElements("td[background]")
+	.forEach(function (x) {
+		x.style = "{display:none;}";
+	})
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)")
+	.style = "{display: none;}";
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)")
+	.style = "{display: none;}";
+
+	getMainFrameElement("#s_Chat")
+	.style = "{width: 70vw;}";
+
+	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
+	.forEach(function (x) {
+		x.style = "{width: 40em;}";
+	})
+
+	getMainFrameElements("body > table > tbody > tr:nth-child(5) > td > table")
+	.forEach(function (x) {
+		x.style = "{display: none;}";
+	})
+
+	getMainFrameElements("body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td")
+	.forEach(function (x) {
+		x.style = "{display: inline;}";
+	});
+
+}
+
 setPassword("1qaz!QAZ2wsx@WSX");
 clickLogin();
-		var grindButton;
-		var craftButton;
+var grindButton;
+var craftButton;
 
 setTimeout(function () {
 
@@ -1259,7 +1328,7 @@ setTimeout(function () {
 
 	grindButton = createGrindButton();
 	craftButton = createCraftButton();
-	
+
 	var grindDiv = document.createElement("div");
 	grindDiv.appendChild(grindButton);
 	grindDiv.appendChild(createMonsterSelect());
@@ -1275,15 +1344,24 @@ setTimeout(function () {
 	moveDiv.appendChild(createPubButton());
 	moveDiv.appendChild(createMinesButton());
 	moveDiv.appendChild(createWalkKingdomsButton());
-	moveDiv.appendChild(createButton("btnBeast", "Beast", function(){warpToBeast();}));
+	moveDiv.appendChild(createButton("btnBeast", "Beast", function () {
+			warpToBeast();
+		}));
 
 	var moveDiv2 = document.createElement("div");
-	moveDiv2.appendChild(createButton("btnNorth", "North", function(){moveNorth();}));
-	moveDiv2.appendChild(createButton("btnSouth", "South", function(){moveSouth();}));
-	moveDiv2.appendChild(createButton("btnEast", "East", function(){moveEast();}));
-	moveDiv2.appendChild(createButton("btnWest", "West", function(){moveWest();}));
+	moveDiv2.appendChild(createButton("btnNorth", "North", function () {
+			moveNorth();
+		}));
+	moveDiv2.appendChild(createButton("btnSouth", "South", function () {
+			moveSouth();
+		}));
+	moveDiv2.appendChild(createButton("btnEast", "East", function () {
+			moveEast();
+		}));
+	moveDiv2.appendChild(createButton("btnWest", "West", function () {
+			moveWest();
+		}));
 
-	
 	div.appendChild(grindDiv);
 	div.appendChild(craftDiv);
 	div.appendChild(moveDiv);
@@ -1313,12 +1391,9 @@ setTimeout(function () {
 		x.setAttribute("width", "");
 	});
 
-	AddStyleSheet(cssString);
+	// you can add the style sheet if you are on PC
+	// AddStyleSheet(cssString);
+	// otherwise, if using a mobile browser or TamperMonkey, use this
+	setStyleAttributes();
 
-	
 }, 5000);
-
-
-
-
-
