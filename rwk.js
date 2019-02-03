@@ -1293,56 +1293,59 @@ function setStyleAttributes() {
 	})
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7)")
-	.style = " display: none; ";
+	.style.display = "none";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table td[width]")
-	.style += " display: block; ";
+	.style.display = "block";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2)")
-	.style += " display: inline-block; ";
+	.style.display = "inline-block";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
-	.style += " display: inline-table; width: 10em; ";
+	.style.display = "inline-table";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
+	.style.width = "10em";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table")
 	.style += " float: left;";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
-	.style += " display: block; ";
+	.style.display = "block";
 
 	getMainFrameElements("td[background]")
 	.forEach(function (x) {
-		x.style = " display:none; ";
+		x.style.display = "none";
 	})
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)")
-	.style = " display: none; ";
+	.style.display = "none";
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)")
-	.style = " display: none; ";
+	.style.display = "none";
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
 	.forEach(function (x) {
-		x.style += " width: 20em; ";
+		x.style.width = "20em";
 	})
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(5) > td > table")
 	.forEach(function (x) {
-		x.style = " display: none; ";
+		x.style.display = "none";
 	})
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td")
 	.forEach(function (x) {
-		x.style += " display: inline; ";
+		x.style.display = "inline";
 	});
 
 }
