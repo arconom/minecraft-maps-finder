@@ -1403,7 +1403,7 @@ setTimeout(function () {
 
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger");
-	selectOptionByText("#selectMonster", "Agleam Avenger");
+	// selectOptionByText("#selectMonster", "Agleam Avenger");
 
 	getMainFrameElement(selectors.actionDelay).style = "display: none";
 	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
