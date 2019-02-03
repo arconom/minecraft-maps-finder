@@ -39,6 +39,7 @@ var cssString = "button{padding: 8px; border-radius: .5em; font-size: larger;}"
 	 + " body > table > tbody > tr:nth-child(2) > td > table td[width]{display: block;}"
 	 + " body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2){display: inline-block;}"
 	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table{display: inline-table; width: 10em;}"
+	 + " body > table > tbody > tr:nth-child(2) > td > table{float: left;}"
 	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]{display: block;}"
 	 + " td[background]{display:none;}"
 	 + " body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)"
@@ -425,6 +426,14 @@ function say(text) {
 	}, getDelay(newFightDelay), selectors.actionSubmit);
 }
 
+function submitGeneralAction() {
+	pollzero(top.frames.main.document.getElementById("general"), 0, true);
+}
+
+function submitKingdomAction() {
+	pollzero(top.frames.main.document.getElementById("king"), 0, true);
+}
+
 function resolveAction(callback, delay, selector) {
 	console.log("resolveAction");
 	if (!selector) {
@@ -494,14 +503,31 @@ function cast() {
 
 function newFight() {
 	console.log("new fight");
-	return setAction("New Fight").then(function () {
-		return setTarget(getMainFrameElement("#selectMonster").value)
-		.then(function () {
-			return resolveAction(function () {
-				clickActionSubmit();
-			}, getDelay(newFightDelay), selectors.castButton);
-		});
+
+	return new Promise(function (resolve, reject) {
+		var sf = top.frames.main.document.getElementById("skipform");
+		// sf.focus();
+
+		if (top.lastfought >= 0) {
+			sf.action.value = "fight";
+			sf.target.value = top.lastfought;
+			window.frames[0].pollzero(sf, 0, true);
+		} else {
+			reject();
+		}
+		setTimeout(function () {
+			resolve();
+		}, getDelay(newFightDelay));
 	});
+
+	/* return setAction("New Fight").then(function () {
+	return setTarget(getMainFrameElement("#selectMonster").value)
+	.then(function () {
+	return resolveAction(function () {
+	clickActionSubmit();
+	}, getDelay(newFightDelay), selectors.castButton);
+	});
+	}); */
 }
 
 function craft(type, item) {
@@ -735,8 +761,15 @@ function walkKingdoms() {
 }
 
 function warpToBeast() {
-	return say("/bnb")
-	.then(function () {
+	return new Promise(function (resolve, reject) {
+		sf.action.value = "chat";
+		sf.target.value = "/bnb";
+		sf.other.value = 0;
+		window.frames[0].pollzero(sf, 0, true);
+		setTimeout(function () {
+			resolve();
+		}, getDelay(newFightDelay));
+	}).then(function () {
 		return new Promise(
 			function (resolve, reject) {
 			if (getResponseMessage().indexOf("You do not have the gear") > -1) {
@@ -749,6 +782,7 @@ function warpToBeast() {
 	}, function () {
 		return Promise.reject();
 	});
+	// say("/bnb")
 }
 
 function logBody() {
@@ -1275,6 +1309,9 @@ function setStyleAttributes() {
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
 	.style += " display: inline-table; width: 10em; ";
+
+	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table")
+	.style += " float: left;";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
 	.style += " display: block; ";
