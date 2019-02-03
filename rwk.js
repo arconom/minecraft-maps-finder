@@ -1264,6 +1264,80 @@ function AddStyleSheet(content) {
 	getMainFrame().querySelector("head").appendChild(this.CreateStyleSheet(content));
 }
 
+function getPlayerDiv() {
+	var returnMe = document.createElement("div");
+	var header = document.createElement("h3");
+	header.textContent = "Player";
+
+	returnMe.appendChild(header);
+
+	returnMe.className = "player-info";
+	[{
+			label: "Level:",
+			value: window.Level
+		}, {
+			label: "Loc:",
+			value: window.Loc
+		}, {
+			label: "Gold:",
+			value: window.Gold
+		}, {
+			label: "Dur:",
+			value: window.Dur
+		}
+	].forEach(function (item) {
+		returnMe.appendChild(getLineItem(item));
+	});
+	return returnMe;
+}
+
+function getKingdomDiv() {
+	var returnMe = document.createElement("div");
+	var header = document.createElement("h3");
+	header.textContent = "Kingdom";
+
+	returnMe.appendChild(header);
+
+	returnMe.className = "kingdom-info";
+	[{
+			label: "King:",
+			value: window.King
+		}, {
+			label: "Runes:",
+			value: window.Runes
+		}, {
+			label: "Cash:",
+			value: window.Tres
+		}, {
+			label: "Tax:",
+			value: window.Tax
+		}, {
+			label: "Morale:",
+			value: window.Moral
+		}, {
+			label: "Pop:",
+			value: window.Pop
+		}, {
+			label: "Food:",
+			value: window.Food
+		}
+	].forEach(function (item) {
+		returnMe.appendChild(getLineItem(item));
+	});
+
+	return returnMe;
+}
+
+function getLineItem(item) {
+	var returnMe = document.createElement("div");
+	var label = document.createElement("label");
+	label.textContent = item.label;
+	var span = document.createElement("span");
+	span.textContent = item.value;
+	returnMe.appendChild(label);
+	returnMe.appendChild(span);
+	return returnMe;
+}
 /*
 This function creates a style sheet and returns it.
  */
@@ -1283,63 +1357,82 @@ function CreateStyleSheet(content) {
 
 // because Tampermonkey doesn't do stylesheets
 function setStyleAttributes() {
+	getMainFrameElements(".info,#s_Window")
+	.forEach(function (x) {
+		x.style.display = "inline-block";
+	});
+
+	getMainFrameElements(".kingdom-info,.player-info")
+	.forEach(function (x) {
+		x.style.backgroundColor = "black";
+		x.style.border = "solid thin white";
+		x.style.width = "15em";
+	});
+
+	getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
+	.forEach(function (x) {
+		x.style.width = "10em";
+		x.style.display = "inline-block";
+	});
+	getMainFrameElements(".kingdom-info > div > label,.player-info > div > label")
+	.forEach(function (x) {
+		x.style.width = "4em";
+		x.style.color = "goldenrod";
+		x.style.display = "inline-block";
+	});
 	getMainFrameElements("button")
 	.forEach(function (x) {
 		x.style += " padding: 8px; border-radius: .5em; font-size: larger;";
-	})
+	});
 	getMainFrameElements("select")
 	.forEach(function (x) {
 		x.style += " padding: 8px; font-size: larger; ";
-	})
+	});
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(4)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(5)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(6)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table.hideDetails > tbody > tr:nth-child(7)")
-	.style.display = "none";
+	getMainFrameElements("body > table > tbody > tr:nth-child(3) > td > table"
+		 + ",body > table > tbody > tr:nth-child(4) > td > table")
+	.forEach(function (x) {
+		x.style.width = "30em";
+	});
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table td[width]")
 	.style.display = "block";
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2)")
+	getMainFrameElement("body > table > tbody > tr:nth-child(1)")
 	.style.display = "inline-block";
-
-	var kingdomTable = getMainFrameElement(selectors.kingdomTable);
-	var playerTable = getMainFrameElement(selectors.playerTable)
-	kingdomTable.style.display = "inline-table";
-	kingdomTable.style.width = "10em";
-	kingdomTable.style += " float: left;";
-	playerTable.style.display = "inline-table";
-	playerTable.style.width = "10em";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
 	.style.display = "block";
 
-	getMainFrameElements("td[background]")
-	.forEach(function (x) {
-		x.style.display = "none";
-	})
-
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(1)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table tr:nth-child(5)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(1)")
-	.style.display = "none";
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table tr:nth-child(8)")
-	.style.display = "none";
-
-	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
+	getMainFrameElements("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(5)"
+		 + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(7)")
 	.forEach(function (x) {
 		x.style.width = "20em";
 	})
 
-	getMainFrameElements("body > table > tbody > tr:nth-child(5) > td > table")
+	getMainFrameElements("td[background]"
+		 + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1)"
+		 + ",body > table > tbody > tr:nth-child(2)"
+		 + ",body > table > tbody > tr:nth-child(5) > td > table"
+		 + ",body > table > tbody > tr:nth-child(2) > td > table")
 	.forEach(function (x) {
 		x.style.display = "none";
+	});
+
+	getMainFrameElements("#s_Exp > table > tbody > tr > td:nth-child(2)"
+		 + ",#s_Exp > table > tbody > tr > td:nth-child(3)"
+		 + ",#s_LifeMeter > table > tbody > tr > td:nth-child(2)"
+		 + ",#s_LifeMeter > table > tbody > tr > td:nth-child(3)")
+	.forEach(function (x) {
+		x.style.display = "block";
+		x.style.display = "block";
+		x.style.display = "block";
+		x.style.display = "block";
+	})
+
+	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
+	.forEach(function (x) {
+		x.style.width = "20em";
 	})
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td")
@@ -1347,20 +1440,14 @@ function setStyleAttributes() {
 		x.style.display = "inline";
 	});
 
-	getMainFrameElement("#s_subbut > input[type=\"image\"]")
-	.style.width = "12em";
-	
-	getMainFrameElement("#s_subbut > input[type=\"image\"]")
-	.style.height = "4em";
-	
-	getMainFrameElement("#s_subbut2 > input[type=\"image\"]")
-	.style.width = "12em";
-	
-	getMainFrameElement("#s_subbut2 > input[type=\"image\"]")
-	.style.height = "4em";
-	
-	
-
+	getMainFrameElements("#s_subbut > input[type=\"image\"]"
+		 + ",#s_subbut2 > input[type=\"image\"]"
+		 + ",#s_subbutNO > img"
+		 + ",#s_subbut2NO > img")
+	.forEach(function (x) {
+		x.style.width = "200px";
+		x.style.height = "60px";
+	});
 }
 
 setPassword("1qaz!QAZ2wsx@WSX");
@@ -1369,6 +1456,13 @@ var grindButton;
 var craftButton;
 
 setTimeout(function () {
+
+	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
+	var infoDiv = document.createElement("div");
+	infoDiv.className = "info";
+	infoDiv.appendChild(getKingdomDiv());
+	infoDiv.appendChild(getPlayerDiv());
+	body.insertAdjacentElement("afterbegin", infoDiv);
 
 	var center = getMainFrame().querySelector("center");
 	var div = document.createElement("div");
