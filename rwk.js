@@ -1307,10 +1307,10 @@ function setStyleAttributes() {
 	getMainFrameElement("body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2)")
 	.style.display = "inline-block";
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table, body > table > tbody > tr:nth-child(2) > td > table")
 	.style.display = "inline-table";
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table,body > table > tbody > tr:nth-child(2) > td > table")
+	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table, body > table > tbody > tr:nth-child(2) > td > table")
 	.style.width = "10em";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table")
@@ -1347,6 +1347,20 @@ function setStyleAttributes() {
 	.forEach(function (x) {
 		x.style.display = "inline";
 	});
+
+	getMainFrameElement("#s_subbut > input[type=\"image\"]")
+	.style.width = "12em";
+	
+	getMainFrameElement("#s_subbut > input[type=\"image\"]")
+	.style.height = "4em";
+	
+	getMainFrameElement("#s_subbut2 > input[type=\"image\"]")
+	.style.width = "12em";
+	
+	getMainFrameElement("#s_subbut2 > input[type=\"image\"]")
+	.style.height = "4em";
+	
+	
 
 }
 
