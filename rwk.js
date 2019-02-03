@@ -1363,7 +1363,7 @@ setTimeout(function () {
 
 	var grindDiv = document.createElement("div");
 	grindDiv.appendChild(grindButton);
-	grindDiv.appendChild(createMonsterSelect());
+	// grindDiv.appendChild(createMonsterSelect());
 
 	var craftDiv = document.createElement("div");
 	craftDiv.appendChild(craftButton);
