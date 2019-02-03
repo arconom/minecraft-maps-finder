@@ -1307,14 +1307,13 @@ function setStyleAttributes() {
 	getMainFrameElement("body > table > tbody > tr:nth-child(1), body > table > tbody > tr:nth-child(2)")
 	.style.display = "inline-block";
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table, body > table > tbody > tr:nth-child(2) > td > table")
-	.style.display = "inline-table";
-
-	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table, body > table > tbody > tr:nth-child(2) > td > table")
-	.style.width = "10em";
-
-	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table")
-	.style += " float: left;";
+	var kingdomTable = getMainFrameElement(selectors.kingdomTable);
+	var playerTable = getMainFrameElement(selectors.playerTable)
+	kingdomTable.style.display = "inline-table";
+	kingdomTable.style.width = "10em";
+	kingdomTable.style += " float: left;";
+	playerTable.style.display = "inline-table";
+	playerTable.style.width = "10em";
 
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
 	.style.display = "block";
