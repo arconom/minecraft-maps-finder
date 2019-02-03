@@ -61,7 +61,7 @@ var selectors = {
 	castButton: "#s_FightWin > img:nth-child(2)",
 	durButton: "img[onmousedown=\"level(3)\"]",
 	reviveButton: "img[onmousedown=\"revive()\"]",
-	response: "#s_Response font",
+	response: "#s_Response",
 	security: "#s_Response img",
 	mainFrame: "frame[name=\"main\"]",
 	target: "select[name=\"target\"]",
@@ -444,6 +444,10 @@ function resolveAction(callback, delay, selector) {
 			}
 		}, function () {
 			rwkState = getRWKState();
+			var r = getResponseMessage();
+			if (r.indexOf("purchase") > -1) {
+				reject();
+			}
 			setTimeout(function () {
 				resolve();
 			}, delay);
@@ -556,7 +560,6 @@ function findBeast() {
 	var returnMe = null;
 	var promiseChain = new Promise(function (resolve, reject) {
 			if (isBeastHere()) {
-				getElement(selectors.target).selectedIndex = 2;
 				resolveAction(function () {
 					clickActionSubmit();
 				}, getDelay(rapidDelay), selectors.actionSubmit)
@@ -732,7 +735,7 @@ function walkKingdoms() {
 }
 
 function warpToBeast() {
-	say("/bnb")
+	return say("/bnb")
 	.then(function () {
 		return new Promise(
 			function (resolve, reject) {
@@ -754,19 +757,12 @@ function logBody() {
 
 function grind() {
 	var returnMe;
-	// if (rwkState.isInventoryFull) {
-	// returnMe = destroyItem();
-	// } else
 	if (rwkState.isFightInProgress) {
 		returnMe = cast();
 	} else if (isMainFrameElementPresent(selectors.actionSubmit)) {
 		returnMe = newFight();
 	} else {
-		returnMe = promise.then(function () {
-				return new Promise(function (resolve, reject) {
-					resolve();
-				});
-			});
+		returnMe = Promise.resolve();
 	}
 	return returnMe;
 }
@@ -826,6 +822,7 @@ function wantItem(text) {
 	var found = false;
 
 	var wantThese = [
+		"Element",
 		"Enhanced Nock",
 		"Annulment",
 		"Believer",
@@ -833,6 +830,7 @@ function wantItem(text) {
 		"Death Spike",
 		"Decay",
 		"Vice",
+		"Putrefaction",
 		"Apex",
 		"Scorn",
 		"Revenge",
@@ -1368,6 +1366,7 @@ setTimeout(function () {
 
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger");
+	selectOptionByText("#selectMonster", "Agleam Avenger");
 
 	getMainFrameElement(selectors.actionDelay).style = "display: none";
 	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
