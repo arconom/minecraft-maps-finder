@@ -1611,6 +1611,7 @@ setTimeout(function () {
 		x.setAttribute("width", "");
 	});
 
+	selectOptionByText(selectors.target, "Agleam");
 	// you can add the style sheet if you are on PC
 	// AddStyleSheet(cssString);
 	// otherwise, if using a mobile browser or TamperMonkey, use this
