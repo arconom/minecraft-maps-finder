@@ -453,13 +453,19 @@ function resolveAction(callback, delay, selector) {
 			}
 		}, function () {
 			rwkState = getRWKState();
+			updateInfo();
 			var r = getResponseMessage();
+			var c = getChat().outerHTML;
 			if (r.indexOf("purchase") > -1) {
 				reject();
+			} else if (c.indexOf("depleted") > -1) {
+				console.log("too fast", callback);
+				throw("too fast");
+			} else {
+				setTimeout(function () {
+					resolve();
+				}, delay);
 			}
-			setTimeout(function () {
-				resolve();
-			}, delay);
 		}, function () {
 			rwkState = getRWKState();
 			setTimeout(function () {
@@ -780,7 +786,9 @@ function warpToBeast() {
 			}
 		});
 	}, function () {
-		return Promise.reject();
+		return new Promise(function (resolve, reject) {
+			reject();
+		});
 	});
 	// say("/bnb")
 }
@@ -841,6 +849,10 @@ function setupLoop(callback) {
 			if (!done) {
 				setupLoop(callback);
 			}
+		})
+		.catch(function(error){
+			console.log(error);
+			throw(error);
 		});
 	}, getLoopDelayValue());
 }
@@ -1264,6 +1276,31 @@ function AddStyleSheet(content) {
 	getMainFrame().querySelector("head").appendChild(this.CreateStyleSheet(content));
 }
 
+function updateInfo() {
+	getMainFrameElement("#spLevel")
+	.textContent = Level;
+	getMainFrameElement("#spLoc")
+	.textContent = Loc;
+	getMainFrameElement("#spGold")
+	.textContent = Gold;
+	getMainFrameElement("#spDur")
+	.textContent = Dur;
+	getMainFrameElement("#spKing")
+	.textContent = King;
+	getMainFrameElement("#spRunes")
+	.textContent = Runes;
+	getMainFrameElement("#spTax")
+	.textContent = Tax;
+	getMainFrameElement("#spMorale")
+	.textContent = Moral;
+	getMainFrameElement("#spCash")
+	.textContent = Tres;
+	getMainFrameElement("#spPop")
+	.textContent = Pop;
+	getMainFrameElement("#spFood")
+	.textContent = Food;
+}
+
 function getPlayerDiv() {
 	var returnMe = document.createElement("div");
 	var header = document.createElement("h3");
@@ -1273,15 +1310,19 @@ function getPlayerDiv() {
 
 	returnMe.className = "player-info";
 	[{
+			id: "spLevel",
 			label: "Level:",
 			value: window.Level
 		}, {
+			id: "spLoc",
 			label: "Loc:",
 			value: window.Loc
 		}, {
+			id: "spGold",
 			label: "Gold:",
 			value: window.Gold
 		}, {
+			id: "spDur",
 			label: "Dur:",
 			value: window.Dur
 		}
@@ -1300,24 +1341,31 @@ function getKingdomDiv() {
 
 	returnMe.className = "kingdom-info";
 	[{
+			id: "spKing",
 			label: "King:",
 			value: window.King
 		}, {
+			id: "spRunes",
 			label: "Runes:",
 			value: window.Runes
 		}, {
+			id: "spCash",
 			label: "Cash:",
 			value: window.Tres
 		}, {
+			id: "spTax",
 			label: "Tax:",
 			value: window.Tax
 		}, {
+			id: "spMorale",
 			label: "Morale:",
 			value: window.Moral
 		}, {
+			id: "spPop",
 			label: "Pop:",
 			value: window.Pop
 		}, {
+			id: "spFood",
 			label: "Food:",
 			value: window.Food
 		}
@@ -1333,6 +1381,7 @@ function getLineItem(item) {
 	var label = document.createElement("label");
 	label.textContent = item.label;
 	var span = document.createElement("span");
+	span.id = item.id;
 	span.textContent = item.value;
 	returnMe.appendChild(label);
 	returnMe.appendChild(span);
