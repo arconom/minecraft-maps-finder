@@ -460,7 +460,7 @@ function resolveAction(callback, delay, selector) {
 				reject();
 			} else if (c.indexOf("depleted") > -1) {
 				console.log("too fast", callback);
-				throw("too fast");
+				throw ("too fast");
 			} else {
 				setTimeout(function () {
 					resolve();
@@ -841,7 +841,10 @@ function setupLoop(callback) {
 	rwkState = getRWKState();
 	setTimeout(function () {
 		checkInterrupts(callback)()
-		.then(function () {
+		.catch(function (error) {
+			console.log(error);
+			throw (error);
+		}).then(function () {
 			if (!done) {
 				setupLoop(callback);
 			}
@@ -849,10 +852,6 @@ function setupLoop(callback) {
 			if (!done) {
 				setupLoop(callback);
 			}
-		})
-		.catch(function(error){
-			console.log(error);
-			throw(error);
 		});
 	}, getLoopDelayValue());
 }
@@ -1459,11 +1458,14 @@ function setStyleAttributes() {
 		x.style.width = "20em";
 	})
 
+	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
+
 	getMainFrameElements("td[background]"
 		 + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1)"
 		 + ",body > table > tbody > tr:nth-child(2)"
 		 + ",body > table > tbody > tr:nth-child(5) > td > table"
-		 + ",body > table > tbody > tr:nth-child(2) > td > table")
+		 + ",body > table > tbody > tr:nth-child(2) > td > table"
+		 + "," + selectors.actionDelay)
 	.forEach(function (x) {
 		x.style.display = "none";
 	});
@@ -1497,6 +1499,80 @@ function setStyleAttributes() {
 		x.style.width = "200px";
 		x.style.height = "60px";
 	});
+	
+	getMainFrameElement("#s_Window").outerHTML = "";
+}
+
+function getMoveDiv() {}
+
+function getInfoDiv() {
+	var returnMe = document.createElement("div");
+	returnMe.className = "info";
+	returnMe.appendChild(getKingdomDiv());
+	returnMe.appendChild(getPlayerDiv());
+	return returnMe;
+}
+
+function getMoveDiv() {
+	var returnMe = document.createElement("div");
+	returnMe.appendChild(createMoveButton());
+	returnMe.appendChild(createHomeButton());
+	returnMe.appendChild(createPubButton());
+	returnMe.appendChild(createMinesButton());
+	returnMe.appendChild(createWalkKingdomsButton());
+	returnMe.appendChild(createButton("btnBeast", "Beast", function () {
+			warpToBeast();
+		}));
+	return returnMe;
+}
+
+function getMoveDiv2() {
+	var returnMe = document.createElement("div");
+	returnMe.appendChild(createButton("btnNorth", "North", function () {
+			moveNorth();
+		}));
+	returnMe.appendChild(createButton("btnSouth", "South", function () {
+			moveSouth();
+		}));
+	returnMe.appendChild(createButton("btnEast", "East", function () {
+			moveEast();
+		}));
+	returnMe.appendChild(createButton("btnWest", "West", function () {
+			moveWest();
+		}));
+	return returnMe;
+}
+
+function getCustomButtonsDiv() {
+	var returnMe = document.createElement("div");
+	returnMe.cssClass = "addedDiv";
+	returnMe.appendChild(getGrindDiv());
+	returnMe.appendChild(getCraftDiv());
+	returnMe.appendChild(getMoveDiv());
+	returnMe.appendChild(getMoveDiv2());
+	return returnMe;
+}
+
+function getGrindDiv() {
+	var returnMe = document.createElement("div");
+	returnMe.appendChild(createGrindButton());
+	// grindDiv.appendChild(createMonsterSelect());
+	return returnMe;
+}
+
+function getCraftDiv() {
+	var returnMe = document.createElement("div");
+	returnMe.appendChild(createCraftButton());
+	returnMe.appendChild(createCraftTypeSelect());
+	returnMe.appendChild(createCraftSelect());
+	return returnMe;
+}
+
+function getUpWindowDiv(){
+	var returnMe = document.createElement("div");
+	returnMe.className = "upwindow";
+	returnMe.innerHTML = getMainFrameElement("#s_Window").outerHTML;
+	return returnMe;
 }
 
 setPassword("1qaz!QAZ2wsx@WSX");
@@ -1505,67 +1581,18 @@ var grindButton;
 var craftButton;
 
 setTimeout(function () {
-
+	var target = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
-	var infoDiv = document.createElement("div");
-	infoDiv.className = "info";
-	infoDiv.appendChild(getKingdomDiv());
-	infoDiv.appendChild(getPlayerDiv());
-	body.insertAdjacentElement("afterbegin", infoDiv);
-
 	var center = getMainFrame().querySelector("center");
-	var div = document.createElement("div");
-	div.cssClass = "addedDiv";
 
-	grindButton = createGrindButton();
-	craftButton = createCraftButton();
-
-	var grindDiv = document.createElement("div");
-	grindDiv.appendChild(grindButton);
-	// grindDiv.appendChild(createMonsterSelect());
-
-	var craftDiv = document.createElement("div");
-	craftDiv.appendChild(craftButton);
-	craftDiv.appendChild(createCraftTypeSelect());
-	craftDiv.appendChild(createCraftSelect());
-
-	var moveDiv = document.createElement("div");
-	moveDiv.appendChild(createMoveButton());
-	moveDiv.appendChild(createHomeButton());
-	moveDiv.appendChild(createPubButton());
-	moveDiv.appendChild(createMinesButton());
-	moveDiv.appendChild(createWalkKingdomsButton());
-	moveDiv.appendChild(createButton("btnBeast", "Beast", function () {
-			warpToBeast();
-		}));
-
-	var moveDiv2 = document.createElement("div");
-	moveDiv2.appendChild(createButton("btnNorth", "North", function () {
-			moveNorth();
-		}));
-	moveDiv2.appendChild(createButton("btnSouth", "South", function () {
-			moveSouth();
-		}));
-	moveDiv2.appendChild(createButton("btnEast", "East", function () {
-			moveEast();
-		}));
-	moveDiv2.appendChild(createButton("btnWest", "West", function () {
-			moveWest();
-		}));
-
-	div.appendChild(grindDiv);
-	div.appendChild(craftDiv);
-	div.appendChild(moveDiv);
-	div.appendChild(moveDiv2);
-
-	center.insertAdjacentElement("afterend", div);
+	target.insertAdjacentElement("afterend", getUpWindowDiv());
+	target.insertAdjacentElement("afterend", getInfoDiv());
+	target.insertAdjacentElement("afterend", getCustomButtonsDiv());
 
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger");
 	// selectOptionByText("#selectMonster", "Agleam Avenger");
 
-	getMainFrameElement(selectors.actionDelay).style = "display: none";
-	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
 	getMainFrameElement(selectors.kingdomTable).onclick = function () {
 		var className = " hideDetails";
 		var classIndex = this.className.indexOf(className);
@@ -1589,3 +1616,7 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
+
+
+
+
