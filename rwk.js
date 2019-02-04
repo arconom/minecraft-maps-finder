@@ -1572,6 +1572,7 @@ function getUpWindowDiv(){
 	var returnMe = document.createElement("div");
 	returnMe.className = "upwindow";
 	returnMe.innerHTML = getMainFrameElement("#s_Window").outerHTML;
+	returnMe.style.display = "inline-block";
 	return returnMe;
 }
 
