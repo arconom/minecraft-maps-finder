@@ -456,12 +456,14 @@ function resolveAction(callback, delay, selector) {
 			updateInfo();
 			var r = getResponseMessage();
 			var c = getChat().outerHTML;
-			if (r.indexOf("purchase") > -1) {
-				reject();
-			} else if (c.indexOf("depleted") > -1) {
-				console.log("too fast", callback);
-				throw ("too fast");
-			} else {
+			if ((r.indexOf("purchase") > -1)
+				 || (c.indexOf("depleted") > -1)
+				 || (c.indexOf("timeout") > -1)) {
+					setTimeout(function () {
+						reject();
+					}, delay);
+				}
+			else {
 				setTimeout(function () {
 					resolve();
 				}, delay);
@@ -512,7 +514,6 @@ function newFight() {
 
 	return new Promise(function (resolve, reject) {
 		var sf = top.frames.main.document.getElementById("skipform");
-		// sf.focus();
 
 		if (top.lastfought >= 0) {
 			sf.action.value = "fight";
@@ -525,15 +526,6 @@ function newFight() {
 			resolve();
 		}, getDelay(newFightDelay));
 	});
-
-	/* return setAction("New Fight").then(function () {
-	return setTarget(getMainFrameElement("#selectMonster").value)
-	.then(function () {
-	return resolveAction(function () {
-	clickActionSubmit();
-	}, getDelay(newFightDelay), selectors.castButton);
-	});
-	}); */
 }
 
 function craft(type, item) {
@@ -626,6 +618,9 @@ function findBeast() {
 						} else {
 							reject();
 						}
+					}, function () {
+						console.log("rejecting findbeast move");
+						reject();
 					});
 				});
 			});
@@ -659,6 +654,9 @@ function teleport(x, y) {
 					console.log("resolving teleport", x, y);
 					resolve();
 				}
+			}, function () {
+				console.log("rejecting teleport", x, y);
+				reject();
 			});
 		}, function () {}, null);
 	});
@@ -768,6 +766,7 @@ function walkKingdoms() {
 
 function warpToBeast() {
 	return new Promise(function (resolve, reject) {
+		var sf = top.frames.main.document.getElementById("skipform");
 		sf.action.value = "chat";
 		sf.target.value = "/bnb";
 		sf.other.value = 0;
@@ -966,6 +965,10 @@ function checkInterrupts(callback) {
 		craftButton.textContent = "Craft";
 
 		makeNoise();
+
+		return new Promise(function (resolve, reject) {
+			reject();
+		});
 		// alert("security");
 	}
 	//if dead revive
@@ -1446,9 +1449,6 @@ function setStyleAttributes() {
 	getMainFrameElement("body > table > tbody > tr:nth-child(2) > td > table td[width]")
 	.style.display = "block";
 
-	getMainFrameElement("body > table > tbody > tr:nth-child(1)")
-	.style.display = "inline-block";
-
 	getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table td[width]")
 	.style.display = "block";
 
@@ -1461,10 +1461,12 @@ function setStyleAttributes() {
 	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
 
 	getMainFrameElements("td[background]"
+		 + ",body > table > tbody > tr:nth-child(1)"
 		 + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1)"
 		 + ",body > table > tbody > tr:nth-child(2)"
-		 + ",body > table > tbody > tr:nth-child(5) > td > table"
 		 + ",body > table > tbody > tr:nth-child(2) > td > table"
+		 + ",body > table > tbody > tr:nth-child(2) > td > center"
+		 + ",body > table > tbody > tr:nth-child(5) > td > table"
 		 + "," + selectors.actionDelay)
 	.forEach(function (x) {
 		x.style.display = "none";
@@ -1499,7 +1501,7 @@ function setStyleAttributes() {
 		x.style.width = "200px";
 		x.style.height = "60px";
 	});
-	
+
 	getMainFrameElement("#s_Window").outerHTML = "";
 }
 
@@ -1555,20 +1557,22 @@ function getCustomButtonsDiv() {
 
 function getGrindDiv() {
 	var returnMe = document.createElement("div");
-	returnMe.appendChild(createGrindButton());
+	grindButton = createGrindButton();
+	returnMe.appendChild(grindButton);
 	// grindDiv.appendChild(createMonsterSelect());
 	return returnMe;
 }
 
 function getCraftDiv() {
 	var returnMe = document.createElement("div");
-	returnMe.appendChild(createCraftButton());
+	craftButton = createCraftButton();
+	returnMe.appendChild(craftButton);
 	returnMe.appendChild(createCraftTypeSelect());
 	returnMe.appendChild(createCraftSelect());
 	return returnMe;
 }
 
-function getUpWindowDiv(){
+function getUpWindowDiv() {
 	var returnMe = document.createElement("div");
 	returnMe.className = "upwindow";
 	returnMe.innerHTML = getMainFrameElement("#s_Window").outerHTML;
@@ -1582,6 +1586,14 @@ var grindButton;
 var craftButton;
 
 setTimeout(function () {
+	var pollWrapper = window.frames[0].pollzero;
+	window.frames[0].pollzero = function (element, num) {
+		pollWrapper(element, num);
+		setTimeout(function () {
+			updateInfo();
+		}, 300);
+	};
+
 	var target = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
 	var center = getMainFrame().querySelector("center");
@@ -1618,7 +1630,3 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
-
-
-
-
