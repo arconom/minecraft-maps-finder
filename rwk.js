@@ -511,20 +511,17 @@ function cast() {
 
 function newFight() {
 	console.log("new fight");
-	alert("newFight");
 	return new Promise(function (resolve, reject) {
-		var sf = top.frames.main.document.getElementById("skipform");
+		var sf = window.frames[0].document.getElementById("skipform");
 
 		if (top.lastfought >= 0) {
 			sf.action.value = "fight";
 			sf.target.value = top.lastfought;
 			window.frames[0].pollzero(sf, 0, true);
 		} else {
-			alert("newFight reject");
 			reject();
 		}
 		setTimeout(function () {
-			alert("newFight resolve");
 			resolve();
 		}, getDelay(newFightDelay));
 	});
