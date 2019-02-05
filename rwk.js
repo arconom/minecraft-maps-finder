@@ -508,7 +508,7 @@ function cast() {
 	}, getDelay(rapidDelay), selectors.response);
 }
 
-/* 
+
 function newFight() {
 	console.log("new fight");
 
@@ -527,8 +527,8 @@ function newFight() {
 		}, getDelay(newFightDelay));
 	});
 }
-*/
 
+/* 
 function newFight() {
 	console.log("new fight");
 	return setAction("New Fight").then(function () {
@@ -540,6 +540,7 @@ function newFight() {
 		});
 	});
 }
+*/
 
 function craft(type, item) {
 	console.log("craft", item);
@@ -776,7 +777,7 @@ function walkKingdoms() {
 			});
 	});
 }
-/* 
+
 function warpToBeast() {
 	return new Promise(function (resolve, reject) {
 		var sf = top.frames.main.document.getElementById("skipform");
@@ -804,8 +805,8 @@ function warpToBeast() {
 	});
 	// say("/bnb")
 }
- */
 
+/* 
 function warpToBeast() {
 	say("/bnb")
 	.then(function () {
@@ -822,7 +823,7 @@ function warpToBeast() {
 		return Promise.reject();
 	});
 }
-
+ */
 function logBody() {
 	console.log(document.body.outerHTML);
 }
@@ -1438,7 +1439,7 @@ function CreateStyleSheet(content) {
 
 // because Tampermonkey doesn't do stylesheets
 function setStyleAttributes() {
-	getMainFrameElements(".info,#s_Window")
+	getMainFrameElements(".info,#s_Window,.addedDiv")
 	.forEach(function (x) {
 		x.style.display = "inline-block";
 	});
@@ -1449,6 +1450,16 @@ function setStyleAttributes() {
 		x.style.border = "solid thin white";
 		x.style.width = "15em";
 	});
+
+	var actionTable = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
+	actionTable.removeAttribute("width");
+	actionTable.removeAttribute("cellspacing");
+	actionTable.removeAttribute("cellpadding");
+	actionTable.removeAttribute("bgcolor");
+	actionTable.removeAttribute("border");
+	actionTable.style = "";
+	actionTable.style.height = "30em";
+	actionTable.style.display = "30em";
 
 	getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
 	.forEach(function (x) {
@@ -1497,6 +1508,8 @@ function setStyleAttributes() {
 		 + ",body > table > tbody > tr:nth-child(2) > td > table"
 		 + ",body > table > tbody > tr:nth-child(2) > td > center"
 		 + ",body > table > tbody > tr:nth-child(5) > td > table"
+		 + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(1)"
+		 + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(6)"
 		 + "," + selectors.actionDelay)
 	.forEach(function (x) {
 		x.style.display = "none";
@@ -1511,12 +1524,12 @@ function setStyleAttributes() {
 		x.style.display = "block";
 		x.style.display = "block";
 		x.style.display = "block";
-	})
+	});
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(4) > td > table, body > table > tbody > tr:nth-child(3) > td > table")
 	.forEach(function (x) {
 		x.style.width = "20em";
-	})
+	});
 
 	getMainFrameElements("body > table > tbody > tr:nth-child(2), body > table > tbody > tr:nth-child(2) > td")
 	.forEach(function (x) {
@@ -1575,7 +1588,7 @@ function getMoveDiv2() {
 
 function getCustomButtonsDiv() {
 	var returnMe = document.createElement("div");
-	returnMe.cssClass = "addedDiv";
+	returnMe.className = "addedDiv";
 	returnMe.appendChild(getGrindDiv());
 	returnMe.appendChild(getCraftDiv());
 	returnMe.appendChild(getMoveDiv());
@@ -1659,8 +1672,3 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
-
-
-
-
-
