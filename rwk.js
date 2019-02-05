@@ -1505,8 +1505,6 @@ function setStyleAttributes() {
 	getMainFrameElement("#s_Window").outerHTML = "";
 }
 
-function getMoveDiv() {}
-
 function getInfoDiv() {
 	var returnMe = document.createElement("div");
 	returnMe.className = "info";
