@@ -511,7 +511,7 @@ function cast() {
 
 function newFight() {
 	console.log("new fight");
-
+	alert("newFight");
 	return new Promise(function (resolve, reject) {
 		var sf = top.frames.main.document.getElementById("skipform");
 
@@ -520,9 +520,11 @@ function newFight() {
 			sf.target.value = top.lastfought;
 			window.frames[0].pollzero(sf, 0, true);
 		} else {
+			alert("newFight reject");
 			reject();
 		}
 		setTimeout(function () {
+			alert("newFight resolve");
 			resolve();
 		}, getDelay(newFightDelay));
 	});
