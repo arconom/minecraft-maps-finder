@@ -1587,7 +1587,7 @@ function getGrindDiv() {
 	var returnMe = document.createElement("div");
 	grindButton = createGrindButton();
 	returnMe.appendChild(grindButton);
-	// grindDiv.appendChild(createMonsterSelect());
+	returnMe.appendChild(createMonsterSelect());
 	return returnMe;
 }
 
@@ -1633,7 +1633,7 @@ setTimeout(function () {
 
 	setOptions(getMainFrameElement("#selectCraftable"), getCraftTypeList(getMainFrameElement("#selectCraftType").value));
 	selectOptionByText("#selectCraftable", "Rusty Dagger");
-	// selectOptionByText("#selectMonster", "Agleam Avenger");
+	selectOptionByText("#selectMonster", "Agleam Avenger");
 
 	getMainFrameElement(selectors.kingdomTable).onclick = function () {
 		var className = " hideDetails";
@@ -1659,6 +1659,7 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
+
 
 
 
