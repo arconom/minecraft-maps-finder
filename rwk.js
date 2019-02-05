@@ -459,11 +459,10 @@ function resolveAction(callback, delay, selector) {
 			if ((r.indexOf("purchase") > -1)
 				 || (c.indexOf("depleted") > -1)
 				 || (c.indexOf("timeout") > -1)) {
-					setTimeout(function () {
-						reject();
-					}, delay);
-				}
-			else {
+				setTimeout(function () {
+					reject();
+				}, delay);
+			} else {
 				setTimeout(function () {
 					resolve();
 				}, delay);
@@ -509,6 +508,7 @@ function cast() {
 	}, getDelay(rapidDelay), selectors.response);
 }
 
+/* 
 function newFight() {
 	console.log("new fight");
 
@@ -525,6 +525,19 @@ function newFight() {
 		setTimeout(function () {
 			resolve();
 		}, getDelay(newFightDelay));
+	});
+}
+*/
+
+function newFight() {
+	console.log("new fight");
+	return setAction("New Fight").then(function () {
+		return setTarget(getMainFrameElement("#selectMonster").value)
+		.then(function () {
+			return resolveAction(function () {
+				clickActionSubmit();
+			}, getDelay(newFightDelay), selectors.castButton);
+		});
 	});
 }
 
@@ -763,7 +776,7 @@ function walkKingdoms() {
 			});
 	});
 }
-
+/* 
 function warpToBeast() {
 	return new Promise(function (resolve, reject) {
 		var sf = top.frames.main.document.getElementById("skipform");
@@ -790,6 +803,24 @@ function warpToBeast() {
 		});
 	});
 	// say("/bnb")
+}
+ */
+
+function warpToBeast() {
+	say("/bnb")
+	.then(function () {
+		return new Promise(
+			function (resolve, reject) {
+			if (getResponseMessage().indexOf("You do not have the gear") > -1) {
+				reject();
+			} else {
+				rwkState.hasWarped = true;
+				resolve();
+			}
+		});
+	}, function () {
+		return Promise.reject();
+	});
 }
 
 function logBody() {
@@ -909,17 +940,16 @@ function wantItem(text) {
 }
 
 function getApexStatus() {
+	isApex = false;
 	setAction("Equip");
-	var returnMe = false;
 	setTimeout(function () {
-		var options = getOptions(selectors.target);
-		options.forEach(function (option) {
-			if (option.textContent.indexOf("Apex") > -1 && option.textContent.indexOf("EQUIPPED") > -1) {
-				returnMe = true;
+		getOptions(selectors.target).forEach(function (option) {
+			if (option.textContent.indexOf("Apex") > -1
+				 && option.textContent.indexOf("EQUIPPED") > -1) {
+				isApex = true;
 			}
 		});
 	});
-	return returnMe;
 }
 
 function getNextUnwantedItem() {
@@ -1090,7 +1120,7 @@ function getDelay(value) {
 
 //UI setup
 function moveHandler() {
-	isApex = getApexStatus();
+	getApexStatus();
 	cancelMove = false;
 	var x = prompt("enter target x");
 	var y = prompt("enter target y");
@@ -1135,7 +1165,7 @@ function startGrindingHandler() {
 	this.textContent = "Stop Grinding";
 	// setAction("New Fight");
 	// setTarget(getMainFrameElement("#selectMonster").value);
-	isApex = getApexStatus();
+	getApexStatus();
 	setupGrindLoop();
 }
 
@@ -1149,7 +1179,7 @@ function startCraftingHandler() {
 	done = false;
 	this.textContent = "Stop Crafting";
 	this.onclick = stopCraftingHandler;
-	isApex = getApexStatus();
+	getApexStatus();
 	setupCraftLoop();
 }
 
@@ -1175,28 +1205,28 @@ function createMoveButton() {
 
 function createHomeButton() {
 	return createButton("btnHome", "Home", function () {
-		isApex = getApexStatus();
+		getApexStatus();
 		travelHandler(157, 49);
 	});
 }
 
 function createPubButton() {
 	return createButton("btnPub", "Pub", function () {
-		isApex = getApexStatus();
+		getApexStatus();
 		travelHandler(pointsOfInterest.Pub.x, pointsOfInterest.Pub.y);
 	});
 }
 
 function createMinesButton() {
 	return createButton("btnMines", "Mines", function () {
-		isApex = getApexStatus();
+		getApexStatus();
 		travelHandler(pointsOfInterest.Mines.x, pointsOfInterest.Mines.y);
 	});
 }
 
 function createWalkKingdomsButton() {
 	return createButton("btnWalkKingdoms", "Walk Kingdoms", function () {
-		isApex = getApexStatus();
+		getApexStatus();
 		walkKingdoms();
 	});
 }
@@ -1584,6 +1614,7 @@ var grindButton;
 var craftButton;
 
 setTimeout(function () {
+/* 	
 	var pollWrapper = window.frames[0].pollzero;
 	window.frames[0].pollzero = function (element, num) {
 		pollWrapper(element, num);
@@ -1591,7 +1622,7 @@ setTimeout(function () {
 			updateInfo();
 		}, 300);
 	};
-
+ */
 	var target = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
 	var center = getMainFrame().querySelector("center");
@@ -1628,3 +1659,7 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
+
+
+
+
