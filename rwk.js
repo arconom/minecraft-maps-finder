@@ -1458,7 +1458,7 @@ function setStyleAttributes() {
 	actionTable.removeAttribute("border");
 	actionTable.style = "";
 	actionTable.style.height = "30em";
-	actionTable.style.display = "30em";
+	actionTable.style.width = "15em";
 
 	getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
 	.forEach(function (x) {
@@ -1495,7 +1495,7 @@ function setStyleAttributes() {
 	getMainFrameElements("body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(5)"
 		 + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(2) > td:nth-child(7) > select:nth-child(7)")
 	.forEach(function (x) {
-		x.style.width = "20em";
+		x.style.width = "10em";
 	})
 
 	getMainFrameElement(selectors.kingdomTable).className += " hideDetails";
