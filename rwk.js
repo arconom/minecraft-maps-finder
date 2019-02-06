@@ -1115,7 +1115,7 @@ function getDelay(value) {
 	}
 	returnMe *= 1 - (haste / 200);
 	console.log("getDelay", returnMe);
-	return returnMe;
+	return returnMe + 100;
 }
 
 //UI setup
