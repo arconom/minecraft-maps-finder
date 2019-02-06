@@ -514,9 +514,9 @@ function newFight() {
 	return new Promise(function (resolve, reject) {
 		var sf = window.frames[0].document.getElementById("skipform");
 
-		if (top.lastfought >= 0) {
+		if (window.frames[0].top.lastfought >= 0) {
 			sf.action.value = "fight";
-			sf.target.value = top.lastfought;
+			sf.target.value = window.frames[0].top.lastfought;
 			window.frames[0].pollzero(sf, 0, true);
 		} else {
 			reject();
@@ -756,7 +756,7 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (/* window.frames[0]. */ parseInt(Tres, 10) >= 1990000000) {
+				if (parseInt(window.frames[0].Tres, 10) >= 1990000000) {
 					return embezzle();
 				} else {
 					return new Promise(function (resolve, reject) {
@@ -766,7 +766,7 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (/* window.frames[0]. */ parseInt(Gold, 10) > 1700000000) {
+				if (parseInt(window.frames[0].Gold, 10) > 1700000000) {
 					return buyRune();
 				} else {
 					return new Promise(function (resolve, reject) {
