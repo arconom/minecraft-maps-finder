@@ -1540,8 +1540,8 @@ function setStyleAttributes() {
 		 + ",#s_subbutNO > img"
 		 + ",#s_subbut2NO > img")
 	.forEach(function (x) {
-		x.style.width = "200px";
-		x.style.height = "60px";
+		x.style.width = "100px";
+		x.style.height = "30px";
 	});
 
 	getMainFrameElement("#s_Window").outerHTML = "";
@@ -1626,7 +1626,7 @@ var grindButton;
 var craftButton;
 
 setTimeout(function () {
-/* 	
+
 	var pollWrapper = window.frames[0].pollzero;
 	window.frames[0].pollzero = function (element, num) {
 		pollWrapper(element, num);
@@ -1634,7 +1634,7 @@ setTimeout(function () {
 			updateInfo();
 		}, 300);
 	};
- */
+
 	var target = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
 	var center = getMainFrame().querySelector("center");
