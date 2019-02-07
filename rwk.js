@@ -754,6 +754,8 @@ function walkKingdoms() {
 		promiseChain = promiseChain
 			.then(function () {
 				return travel(kd.x, kd.y);
+			},function () {
+				Promise.reject();
 			});
 		promiseChain = promiseChain
 			.then(function () {
