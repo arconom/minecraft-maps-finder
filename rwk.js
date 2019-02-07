@@ -508,7 +508,6 @@ function cast() {
 	}, getDelay(rapidDelay), selectors.response);
 }
 
-
 function newFight() {
 	console.log("new fight");
 	return new Promise(function (resolve, reject) {
@@ -527,19 +526,19 @@ function newFight() {
 	});
 }
 
-/* 
+/*
 function newFight() {
-	console.log("new fight");
-	return setAction("New Fight").then(function () {
-		return setTarget(getMainFrameElement("#selectMonster").value)
-		.then(function () {
-			return resolveAction(function () {
-				clickActionSubmit();
-			}, getDelay(newFightDelay), selectors.castButton);
-		});
-	});
+console.log("new fight");
+return setAction("New Fight").then(function () {
+return setTarget(getMainFrameElement("#selectMonster").value)
+.then(function () {
+return resolveAction(function () {
+clickActionSubmit();
+}, getDelay(newFightDelay), selectors.castButton);
+});
+});
 }
-*/
+ */
 
 function craft(type, item) {
 	console.log("craft", item);
@@ -719,8 +718,7 @@ function travel(x, y) {
 		return teleport(point.x, point.y)
 		.then(function () {
 			return travel(x, y);
-		}
-		,function(){
+		}, function () {
 			reject();
 		});
 	} else {
@@ -808,22 +806,22 @@ function warpToBeast() {
 	// say("/bnb")
 }
 
-/* 
+/*
 function warpToBeast() {
-	say("/bnb")
-	.then(function () {
-		return new Promise(
-			function (resolve, reject) {
-			if (getResponseMessage().indexOf("You do not have the gear") > -1) {
-				reject();
-			} else {
-				rwkState.hasWarped = true;
-				resolve();
-			}
-		});
-	}, function () {
-		return Promise.reject();
-	});
+say("/bnb")
+.then(function () {
+return new Promise(
+function (resolve, reject) {
+if (getResponseMessage().indexOf("You do not have the gear") > -1) {
+reject();
+} else {
+rwkState.hasWarped = true;
+resolve();
+}
+});
+}, function () {
+return Promise.reject();
+});
 }
  */
 function logBody() {
@@ -1220,6 +1218,18 @@ function createPubButton() {
 	});
 }
 
+function createRuneButton() {
+	return createButton("btnRune", "Buy Rune", function () {
+		buyRune();
+	});
+}
+
+function createEmbezzleButton() {
+	return createButton("btnEmbezzle", "Embezzle", function () {
+		embezzle();
+	});
+}
+
 function createMinesButton() {
 	return createButton("btnMines", "Mines", function () {
 		getApexStatus();
@@ -1408,6 +1418,9 @@ function getKingdomDiv() {
 		returnMe.appendChild(getLineItem(item));
 	});
 
+	returnMe.appendChild(createRuneButton());
+	returnMe.appendChild(createEmbezzleButton());
+
 	return returnMe;
 }
 
@@ -1462,6 +1475,13 @@ function setStyleAttributes() {
 	actionTable.style = "";
 	actionTable.style.height = "30em";
 	actionTable.style.width = "15em";
+
+	getMainFrameElement(selectors.playerTable).querySelectorAll("td[width]").forEach(function (x) {
+		x.setAttribute("width", "");
+	});
+	getMainFrameElement(selectors.kingdomTable).querySelectorAll("td[width]").forEach(function (x) {
+		x.setAttribute("width", "");
+	});
 
 	getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
 	.forEach(function (x) {
@@ -1641,6 +1661,7 @@ setTimeout(function () {
 	var target = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 	var body = getMainFrameElement("body > table > tbody > tr:nth-child(1) > td:nth-child(2)");
 	var center = getMainFrame().querySelector("center");
+	var actionTable = getMainFrameElement("body > table > tbody > tr:nth-child(3) > td > table");
 
 	target.insertAdjacentElement("afterend", getUpWindowDiv());
 	target.insertAdjacentElement("afterend", getInfoDiv());
@@ -1660,13 +1681,6 @@ setTimeout(function () {
 		}
 	};
 
-	getMainFrameElement(selectors.playerTable).querySelectorAll("td[width]").forEach(function (x) {
-		x.setAttribute("width", "");
-	});
-	getMainFrameElement(selectors.kingdomTable).querySelectorAll("td[width]").forEach(function (x) {
-		x.setAttribute("width", "");
-	});
-
 	selectOptionByText(selectors.target, "Agleam");
 	// you can add the style sheet if you are on PC
 	// AddStyleSheet(cssString);
@@ -1674,7 +1688,6 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
-
 
 
 
