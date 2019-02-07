@@ -719,6 +719,9 @@ function travel(x, y) {
 		return teleport(point.x, point.y)
 		.then(function () {
 			return travel(x, y);
+		}
+		,function(){
+			reject();
 		});
 	} else {
 		console.log("resolving travel", x, y);
@@ -1671,3 +1674,7 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
+
+
+
+
