@@ -759,7 +759,8 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (parseInt(window.frames[0].Tres, 10) >= 1990000000) {
+				var t = Tres ? Tres : window.frames[0].Tres;
+				if (parseInt(t, 10) >= 1990000000) {
 					return embezzle();
 				} else {
 					return new Promise(function (resolve, reject) {
@@ -769,7 +770,8 @@ function walkKingdoms() {
 			});
 		promiseChain = promiseChain
 			.then(function () {
-				if (parseInt(window.frames[0].Gold, 10) > 1700000000) {
+				var g = Gold ? Gold : window.frames[0].Gold;
+				if (parseInt(g, 10) > 1700000000) {
 					return buyRune();
 				} else {
 					return new Promise(function (resolve, reject) {
