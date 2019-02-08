@@ -942,7 +942,7 @@ function wantItem(text) {
 		"Solon`s Arcane Booklet",
 		"Sylvain Fletcher`s Workbook",
 		"Temple Stone",
-		"Theurgal Rune Staff",
+		"Theurgal",
 		"Vice",
 		"Virtue",
 		"Voidance"
