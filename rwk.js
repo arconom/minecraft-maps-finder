@@ -900,37 +900,52 @@ function wantItem(text) {
 	var found = false;
 
 	var wantThese = [
-		"Element",
-		"Enhanced Nock",
+		"Allegiance",
+		"Angel Hair",
 		"Annulment",
+		"Apex",
+		"Attacker`s Balance",
+		"Balace Armorcraft Guide",
+		"Beast Noobane",
 		"Believer",
+		"Black Ashen Rock",
+		"Captain`s Staff of Valor",
 		"Cara",
+		"Clarity",
+		"Conquest",
 		"Death Spike",
 		"Decay",
-		"Vice",
-		"Putrefaction",
-		"Apex",
-		"Scorn",
-		"Revenge",
-		"Melee",
-		"Devil",
-		"Voidance",
+		"Delegation",
 		"Demon Horn",
-		"Angel Hair",
-		"Temple Stone",
-		"Enduring Fists",
-		"Sharpening Stone",
+		"Devestation",
+		"Devil",
+		"Devoid",
 		"Dwarven Weaponcraft Guide",
-		"Balace Armorcraft Guide",
-		"Sylvain Fletcher`s Workbook",
-		"Solon`s Arcane Booklet",
+		"Edge",
+		"Element",
+		"Enduring Fists",
+		"Enhanced Nock",
+		"Fallen",
+		"Impet",
+		"Melee",
 		"Mesmer`s Book of Mythics",
-		"Theurgal Rune Staff",
-		"Beast Noobane",
-		"Attacker`s Balance",
-		"Captain`s Staff of Valor",
+		"Monast",
+		"Preserv",
+		"Putrefaction",
+		"Rectification",
+		"Revenge",
+		"Sacrificial",
 		"Scepter of Specter Sight",
-		"Black Ashen Rock"
+		"Scorn",
+		"Severity",
+		"Sharpening Stone",
+		"Solon`s Arcane Booklet",
+		"Sylvain Fletcher`s Workbook",
+		"Temple Stone",
+		"Theurgal Rune Staff",
+		"Vice",
+		"Virtue",
+		"Voidance"
 	];
 
 	wantThese.forEach(function (x) {
@@ -1690,6 +1705,3 @@ setTimeout(function () {
 	setStyleAttributes();
 
 }, 5000);
-
-
-
