@@ -36,6 +36,55 @@ var ViewModel = (function () {
 
 	function init() {
 
+		var selectors = {
+			actionDelay: "#s_ActionDelay",
+			actionSelect: "select[name=\"action\"]",
+			actionSubmit: "#s_subbut0 > input[type=\"image\"]",
+			actionTable: "body > table > tbody > tr:nth-child(3) > td > table",
+			actionsSelect2: "#generaltd1 > select[name=\"action\"]",
+			actionsSelect3: "#generaltd2 > select[name=\"action\"]",
+			castButton: "#s_FightWin > img:nth-child(2)",
+			chat: "#s_Chat",
+			chatBox: "#chattybox",
+			chatForm: "#chat",
+			chatSubmit: "#s_chatbut > input",
+			craftButton: "#btnCraft",
+			craftQualitySelect: "#selectCraftQuality",
+			craftTypeSelect: "#selectCraftType",
+			durButton: "img[onmousedown=\"level(3)\"]",
+			embezzleButton: "#btnEmbezzle",
+			fightButtons: "#s_FightWin",
+			generalForm: "#general0",
+			grindButton: "#btnGrind",
+			grindMonsterSelect: "#selectMonster",
+			homeButton: "#btnHome",
+			kingForm: "#king0",
+			kingdomActionSubmit: "#s_subbut2 > input",
+			kingdomActionsSelect: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > select:nth-child(2)",
+			kingdomOtherA: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > input[type=\"text\"]",
+			kingdomTable: "body > table > tbody > tr:nth-child(2) > td > table",
+			loginButton: "#subshit",
+			mainFrame: "frame[name=\"main\"]",
+			minesButton: "#btnMines",
+			other: "select[name=\"other\"]",
+			othera: "select[name=\"othera\"]",
+			passwordInput: "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(5) > td > input[type=\"password\"]:nth-child(6)",
+			playerTable: "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table",
+			pubButton: "#btnPub",
+			response: "#s_Response",
+			reviveButton: "img[onmousedown=\"revive()\"]",
+			runeButton: "#btnRune",
+			security: "#s_Response img",
+			target: "select[name=\"target\"]",
+			travelButton: "#btnTravel",
+			travelOption: "option[value=\"tele\"]",
+			upWindow: "#s_Window",
+			walkKingdomsButton: "#btnWalkKingdoms",
+			windowTable: "#s_Window > table"
+		};
+		function getMainFrameElement(selector) {
+			return getMainFrame().querySelector(selector);
+		}
 		function getElement(selector) {
 			var returnMe = document.querySelector(selector);
 			if (!returnMe) {
@@ -43,228 +92,237 @@ var ViewModel = (function () {
 			}
 			return returnMe;
 		}
+		function getMainFrameElements(selector) {
+			return getMainFrame().querySelectorAll(selector);
+		}
+		function getActionTable() {
+			return this.getMainFrame().querySelector(selectors.actionTable);
+		}
+		function getPasswordInput() {
+			return this.getMainFrame().querySelector(selectors.passwordInput);
+		}
+		function getLoginButton() {
+			return this.getMainFrame().querySelector(selectors.loginButton);
+		}
+		function getKingForm() {
+			return this.getMainFrame().querySelector(selectors.kingForm);
+		}
+		function getGeneralForm() {
+			return this.getMainFrame().querySelector(selectors.generalForm);
+		}
+		function getActionDelay() {
+			return this.getMainFrame().querySelector(selectors.actionDelay);
+		}
+		function getActionSubmit() {
+			return this.getMainFrame().querySelector(selectors.actionSubmit);
+		}
+		function getActionSelect() {
+			return this.getMainFrame().querySelector(selectors.actionSelect);
+		}
+		function getActionSelect2() {
+			return this.getMainFrame().querySelector(selectors.actionSelect2);
+		}
+		function getActionSelect3() {
+			return this.getMainFrame().querySelector(selectors.actionSelect3);
+		}
+		function getCastButton() {
+			return this.getMainFrame().querySelector(selectors.castButton);
+		}
+		function getChatForm() {
+			return this.getMainFrame().querySelector(selectors.chatForm);
+		}
+		function getChat() {
+			return this.getMainFrame().querySelector(selectors.chat);
+		}
+		function getChatBox() {
+			return this.getMainFrame().querySelector(selectors.chatBox);
+		}
+		function getChatSubmit() {
+			return this.getMainFrame().querySelector(selectors.chatSubmit);
+		}
+		function getDurButton() {
+			return this.getMainFrame().querySelector(selectors.durButton);
+		}
+		function getFightButtons() {
+			return this.getMainFrame().querySelector(selectors.fughtButtons);
+		}
+		function getKingdomActionSubmit() {
+			return this.getMainFrame().querySelector(selectors.kingdomActionSubmit);
+		}
+		function getKingdomActionSelect() {
+			return this.getMainFrame().querySelector(selectors.kingdomActionSelect);
+		}
+		function getKingdomOtherA() {
+			return this.getMainFrame().querySelector(selectors.kingdomOtherA);
+		}
+		function getKingdomTable() {
+			return this.getMainFrame().querySelector(selectors.kingdomTable);
+		}
+		function getMainFrame() {
+
+			var mainFrame = getElement(selectors.mainFrame);
+
+			if (!mainFrame) {
+				throw ("cant find main frame");
+			}
+			if (mainFrame.contentWindow.document) {
+				mainFrame = mainFrame.contentWindow.document;
+			} else {
+				mainFrame = mainFrame.contentDocument;
+			}
+			return mainFrame;
+		}
+		function getOther() {
+			return this.getMainFrame().querySelector(selectors.other);
+		}
+		function getOtherA() {
+			return this.getMainFrame().querySelector(selectors.otherA);
+		}
+		function getPlayerTable() {
+			return this.getMainFrame().querySelector(selectors.playerTable);
+		}
+		function getResponse() {
+			return this.getMainFrame().querySelector(selectors.response);
+		}
+		function getReviveButton() {
+			return this.getMainFrame().querySelector(selectors.reviveButton);
+		}
+		function getSecurity() {
+			return this.getMainFrame().querySelector(selectors.security);
+		}
+		function getTarget() {
+			return this.getMainFrame().querySelector(selectors.target);
+		}
+		function getTravelButton() {
+			return this.getMainFrame().querySelector(selectors.travelButton);
+		}
+		function getTravelOption() {
+			return this.getMainFrame().querySelector(selectors.travelOption);
+		}
+		function getWindowTable() {
+			return this.getMainFrame().querySelector(selectors.windowTable);
+		}
+		function getCraftQualitySelect() {
+			return this.getMainFrame().querySelector(selectors.craftQualitySelect);
+		}
+		function getCraftTypeSelect() {
+			return this.getMainFrame().querySelector(
+				selectors.craftTypeSelect);
+		}
+		function getGrindMonsterSelect() {
+			return this.getMainFrame().querySelector(
+				selectors.grindMonsterSelect);
+		}
+		function getGrindButton() {
+			return this.getMainFrame().querySelector(
+				selectors.grindButton);
+		}
+		function getCraftButton() {
+			return this.getMainFrame().querySelector(
+				selectors.craftButton);
+		}
+		function getTravelButton() {
+			return this.getMainFrame().querySelector(
+				selectors.travelButton);
+		}
+		function getHomeButton() {
+			return this.getMainFrame().querySelector(
+				selectors.homeButton);
+		}
+		function getPubButton() {
+			return this.getMainFrame().querySelector(
+				selectors.pubButton);
+		}
+		function getRuneButton() {
+			return this.getMainFrame().querySelector(
+				selectors.runeButton);
+		}
+		function getEmbezzleButton() {
+			return this.getMainFrame().querySelector(
+				selectors.embezzleButton);
+		}
+		function getMinesButton() {
+			return this.getMainFrame().querySelector(
+				selectors.minesButton);
+		}
+		function getUpWindow() {
+			return this.getMainFrame().querySelector(
+				selectors.upWindow);
+		}
+		function getWalkKingdomsButton() {
+			return this.getMainFrame().querySelector(
+				selectors.walkKingdomsButton);
+		}
+		function getResponseMessage() {
+			var element = viewModel.getResponse();
+			if (element) {
+				return element.textContent;
+			} else {
+				return "";
+			}
+		}
+		function getChatText() {
+			var returnMe = [];
+			viewModel.getChat().querySelectorAll("font").forEach(function (x) {
+				returnMe.push(x.textContent);
+			});
+			return returnMe;
+		}
 
 		//// Singleton
 		//// Private methods and variables
 
 		return {
-			selectors: {
-				actionDelay: "#s_ActionDelay",
-				actionSelect: "select[name=\"action\"]",
-				actionSubmit: "#s_subbut0 > input[type=\"image\"]",
-				actionTable: "body > table > tbody > tr:nth-child(3) > td > table",
-				actionsSelect2: "#generaltd1 > select[name=\"action\"]",
-				actionsSelect3: "#generaltd2 > select[name=\"action\"]",
-				castButton: "#s_FightWin > img:nth-child(2)",
-				chat: "#s_Chat",
-				chatBox: "#chattybox",
-				chatForm: "#chat",
-				chatSubmit: "#s_chatbut > input",
-				craftButton: "#btnCraft",
-				craftQualitySelect: "#selectCraftQuality",
-				craftTypeSelect: "#selectCraftType",
-				durButton: "img[onmousedown=\"level(3)\"]",
-				embezzleButton: "#btnEmbezzle",
-				fightButtons: "#s_FightWin",
-				generalForm: "#general0",
-				grindButton: "#btnGrind",
-				grindMonsterSelect: "#selectMonster",
-				homeButton: "#btnHome",
-				kingForm: "#king0",
-				kingdomActionSubmit: "#s_subbut2 > input",
-				kingdomActionsSelect: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > select:nth-child(2)",
-				kingdomOtherA: "body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(3) > td > input[type=\"text\"]",
-				kingdomTable: "body > table > tbody > tr:nth-child(2) > td > table",
-				loginButton: "#subshit",
-				mainFrame: "frame[name=\"main\"]",
-				minesButton: "#btnMines",
-				other: "select[name=\"other\"]",
-				othera: "select[name=\"othera\"]",
-				passwordInput: "body > table > tbody > tr:nth-child(2) > td > table > tbody > tr:nth-child(5) > td > input[type=\"password\"]:nth-child(6)",
-				playerTable: "body > table > tbody > tr:nth-child(1) > td:nth-child(1) > table",
-				pubButton: "#btnPub",
-				response: "#s_Response",
-				reviveButton: "img[onmousedown=\"revive()\"]",
-				runeButton: "#btnRune",
-				security: "#s_Response img",
-				target: "select[name=\"target\"]",
-				travelButton: "#btnTravel",
-				travelOption: "option[value=\"tele\"]",
-				upWindow: "#s_Window",
-				walkKingdomsButton: "#btnWalkKingdoms",
-				windowTable: "#s_Window > table"
-			},
-			getActionTable: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionTable);
-			},
-			getPasswordInput: function () {
-				return this.getMainFrame().querySelector(this.selectors.passwordInput);
-			},
-			getLoginButton: function () {
-				return this.getMainFrame().querySelector(this.selectors.loginButton);
-			},
-			getKingForm: function () {
-				return this.getMainFrame().querySelector(this.selectors.kingForm);
-			},
-			getGeneralForm: function () {
-				return this.getMainFrame().querySelector(this.selectors.generalForm);
-			},
-			getActionDelay: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionDelay);
-			},
-			getActionSubmit: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionSubmit);
-			},
-			getActionSelect: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionSelect);
-			},
-			getActionSelect2: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionSelect2);
-			},
-			getActionSelect3: function () {
-				return this.getMainFrame().querySelector(this.selectors.actionSelect3);
-			},
-			getCastButton: function () {
-				return this.getMainFrame().querySelector(this.selectors.castButton);
-			},
-			getChatForm: function () {
-				return this.getMainFrame().querySelector(this.selectors.chatForm);
-			},
-			getChat: function () {
-				return this.getMainFrame().querySelector(this.selectors.chat);
-			},
-			getChatBox: function () {
-				return this.getMainFrame().querySelector(this.selectors.chatBox);
-			},
-			getChatSubmit: function () {
-				return this.getMainFrame().querySelector(this.selectors.chatSubmit);
-			},
-			getDurButton: function () {
-				return this.getMainFrame().querySelector(this.selectors.durButton);
-			},
-			getFightButtons: function () {
-				return this.getMainFrame().querySelector(this.selectors.fughtButtons);
-			},
-			getKingdomActionSubmit: function () {
-				return this.getMainFrame().querySelector(this.selectors.kingdomActionSubmit);
-			},
-			getKingdomActionSelect: function () {
-				return this.getMainFrame().querySelector(this.selectors.kingdomActionSelect);
-			},
-			getKingdomOtherA: function () {
-				return this.getMainFrame().querySelector(this.selectors.kingdomOtherA);
-			},
-			getKingdomTable: function () {
-				return this.getMainFrame().querySelector(this.selectors.kingdomTable);
-			},
-			getMainFrame: function () {
-
-				var mainFrame = getElement(this.selectors.mainFrame);
-
-				if (!mainFrame) {
-					throw ("cant find main frame");
-				}
-				if (mainFrame.contentWindow.document) {
-					mainFrame = mainFrame.contentWindow.document;
-				} else {
-					mainFrame = mainFrame.contentDocument;
-				}
-				return mainFrame;
-			},
-			getOther: function () {
-				return this.getMainFrame().querySelector(this.selectors.other);
-			},
-			getOtherA: function () {
-				return this.getMainFrame().querySelector(this.selectors.otherA);
-			},
-			getPlayerTable: function () {
-				return this.getMainFrame().querySelector(this.selectors.playerTable);
-			},
-			getResponse: function () {
-				return this.getMainFrame().querySelector(this.selectors.response);
-			},
-			getReviveButton: function () {
-				return this.getMainFrame().querySelector(this.selectors.reviveButton);
-			},
-			getSecurity: function () {
-				return this.getMainFrame().querySelector(this.selectors.security);
-			},
-			getTarget: function () {
-				return this.getMainFrame().querySelector(this.selectors.target);
-			},
-			getTravelOption: function () {
-				return this.getMainFrame().querySelector(this.selectors.travelOption);
-			},
-			getWindowTable: function () {
-				return this.getMainFrame().querySelector(this.selectors.windowTable);
-			},
-			getCraftQualitySelect: function () {
-				return this.getMainFrame().querySelector(this.selectors.craftQualitySelect);
-			},
-			getCraftTypeSelect: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.craftTypeSelect);
-			},
-			getGrindMonsterSelect: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.grindMonsterSelect);
-			},
-			getGrindButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.grindButton);
-			},
-			getCraftButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.craftButton);
-			},
-			getTravelButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.travelButton);
-			},
-			getHomeButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.homeButton);
-			},
-			getPubButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.pubButton);
-			},
-			getRuneButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.runeButton);
-			},
-			getEmbezzleButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.embezzleButton);
-			},
-			getMinesButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.minesButton);
-			},
-			getUpWindow: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.upWindow);
-			},
-			getWalkKingdomsButton: function () {
-				return this.getMainFrame().querySelector(
-					this.selectors.walkKingdomsButton);
-			},
-			getResponseMessage: function () {
-				var element = viewModel.getResponse();
-				if (element) {
-					return element.textContent;
-				} else {
-					return "";
-				}
-			},
-			getChatText: function () {
-				var returnMe = [];
-				viewModel.getChat().querySelectorAll("font").forEach(function (x) {
-					returnMe.push(x.textContent);
-				});
-				return returnMe;
-			}
-
+			selectors: selectors,
+			getActionTable: getActionTable,
+			getPasswordInput: getPasswordInput,
+			getLoginButton: getLoginButton,
+			getKingForm: getKingForm,
+			getGeneralForm: getGeneralForm,
+			getActionDelay: getActionDelay,
+			getActionSubmit: getActionSubmit,
+			getActionSelect: getActionSelect,
+			getActionSelect2: getActionSelect2,
+			getActionSelect3: getActionSelect3,
+			getCastButton: getCastButton,
+			getChatForm: getChatForm,
+			getChat: getChat,
+			getChatBox: getChatBox,
+			getChatSubmit: getChatSubmit,
+			getDurButton: getDurButton,
+			getFightButtons: getFightButtons,
+			getKingdomActionSubmit: getKingdomActionSubmit,
+			getKingdomActionSelect: getKingdomActionSelect,
+			getKingdomOtherA: getKingdomOtherA,
+			getKingdomTable: getKingdomTable,
+			getMainFrame: getMainFrame,
+			getMainFrameElement: getMainFrameElement,
+			getMainFrameElements: getMainFrameElements,
+			getOther: getOther,
+			getOtherA: getOtherA,
+			getPlayerTable: getPlayerTable,
+			getResponse: getResponse,
+			getReviveButton: getReviveButton,
+			getSecurity: getSecurity,
+			getTarget: getTarget,
+			getTravelButton: getTravelButton,
+			getTravelOption: getTravelOption,
+			getWindowTable: getWindowTable,
+			getCraftQualitySelect: getCraftQualitySelect,
+			getCraftTypeSelect: getCraftTypeSelect,
+			getGrindMonsterSelect: getGrindMonsterSelect,
+			getGrindButton: getGrindButton,
+			getCraftButton: getCraftButton,
+			getTravelButton: getTravelButton,
+			getHomeButton: getHomeButton,
+			getPubButton: getPubButton,
+			getRuneButton: getRuneButton,
+			getEmbezzleButton: getEmbezzleButton,
+			getMinesButton: getMinesButton,
+			getUpWindow: getUpWindow,
+			getWalkKingdomsButton: getWalkKingdomsButton,
+			getResponseMessage: getResponseMessage,
+			getChatText: getChatText
 		};
 	}
 
@@ -283,6 +341,70 @@ var UISetup = (function () {
 
 	function init() {
 
+		function checkInterrupts(callback) {
+			var returnMe;
+			if (rwkState.isSecurityResponseNeeded) {
+				done = true;
+				grindButton.onclick = startGrindingHandler;
+				grindButton.textContent = "Grind";
+				craftButton.onclick = startCraftingHandler;
+				craftButton.textContent = "Craft";
+
+				makeNoise();
+
+				returnMe = function () {
+					return new Promise(function (resolve, reject) {
+						reject();
+					});
+				}
+				// alert("security");
+			}
+			//if dead revive
+			else if (rwkState.isReviveNeeded) {
+				returnMe = function () {
+					setTimeout(function () {
+						return actions.revive();
+					}, reviveDelay);
+				};
+			}
+			//if level up buttons
+			else if (rwkState.isTrainingNeeded) {
+				returnMe = actions.train;
+			} else if (rwkState.isBeastActive && getBeastPosition().plane === "Sur") {
+				done = true;
+				grindButton.onclick = startGrindingHandler;
+				grindButton.textContent = "Grind";
+				craftButton.onclick = startCraftingHandler;
+				craftButton.textContent = "Craft";
+				makeNoise();
+				returnMe = actions.beastHandler;
+			} else if (rwkState.isInventoryFull) {
+				returnMe = actions.destroyItem;
+			} else {
+				returnMe = callback;
+			}
+			return returnMe;
+		}
+
+		function setupLoop(callback) {
+			rwkState = getRWKState();
+			setTimeout(function () {
+				checkInterrupts(callback)()
+				.catch(function (error) {
+					console.log(error);
+					throw (error);
+				}).then(function () {
+					if (!done) {
+						setupLoop(callback);
+					}
+				}, function () {
+					if (!done) {
+						setupLoop(callback);
+					}
+				});
+			}, getLoopDelayValue());
+		}
+
 		function moveHandler() {
 			getApexStatus();
 			cancelMove = false;
@@ -294,8 +416,8 @@ var UISetup = (function () {
 		}
 		function travelHandler(x, y) {
 			cancelMove = false;
-			var button = getElement("#btnTravel");
-			travel(x, y)
+			var button = viewModel.getTravelButton();
+			actions.travel(x, y)
 			.then(function () {
 				button.textContent = "Travel";
 			}, function () {});
@@ -335,7 +457,7 @@ var UISetup = (function () {
 			this.textContent = "Stop Crafting";
 			this.onclick = stopCraftingHandler;
 			getApexStatus();
-			setupLoop(craftAndSell);
+			setupLoop(ACTIONS.craftAndSell);
 		}
 
 		//// Singleton
@@ -389,7 +511,7 @@ var UISetup = (function () {
 		function createWalkKingdomsButton() {
 			return createButton("btnWalkKingdoms", "Walk Kingdoms", function () {
 				getApexStatus();
-				walkKingdoms();
+				actions.walkKingdoms();
 			});
 		}
 		function createWeaponSelect() {
@@ -590,6 +712,7 @@ var UISetup = (function () {
 					x.style.height = "30px";
 				});
 				viewModel.getMainFrameElement("#s_Window").outerHTML = "";
+				viewModel.getActionDelay().style.display = "none";
 			},
 			getPlayerDiv: function () {
 				var returnMe = document.createElement("div");
@@ -675,7 +798,7 @@ var UISetup = (function () {
 				returnMe.appendChild(createMinesButton());
 				returnMe.appendChild(createWalkKingdomsButton());
 				returnMe.appendChild(createButton("btnBeast", "Beast", function () {
-						warpToBeast();
+						actions.warpToBeast();
 					}));
 				return returnMe;
 			},
@@ -942,7 +1065,12 @@ var Actions = (function () {
 		function destroyItem(name) {
 			console.log("destroy");
 			setAction("DESTROY");
-			return selectOptionByValue(viewModel.getTarget(), getNextUnwantedItem(), true)
+			var burnMe = getNextUnwantedItem();
+			if (!burnMe) {
+				done = true;
+				return Promise.reject();
+			}
+			return selectOptionByValue(viewModel.getTarget(), burnMe, true)
 			.then(function () {
 				return resolveAction(function () {
 					submitGeneralAction();
@@ -1078,7 +1206,7 @@ var Actions = (function () {
 						submitGeneralAction();
 					}, getDelay(standardDelay), viewModel.selectors.actionSubmit)
 					.then(function () {
-						if (getResponseMessage().indexOf("purchase") > -1) {
+						if (viewModel.getResponseMessage().indexOf("purchase") > -1) {
 							reject();
 						} else {
 							console.log("resolving teleport", x, y);
@@ -1209,7 +1337,7 @@ var Actions = (function () {
 			}).then(function () {
 				return new Promise(
 					function (resolve, reject) {
-					if (getResponseMessage().indexOf("You do not have the gear") > -1) {
+					if (viewModel.getResponseMessage().indexOf("You do not have the gear") > -1) {
 						reject();
 					} else {
 						rwkState.hasWarped = true;
@@ -1450,13 +1578,7 @@ function clickMainFrameElement(selector) {
 getMainFrameElement(selector).click();
 }
 
-function getMainFrameElement(selector) {
-return getMainFrame().querySelector(selector);
-}
 
-function getMainFrameElements(selector) {
-return getMainFrame().querySelectorAll(selector);
-}
 
 
 
@@ -1485,7 +1607,7 @@ function awaitMarkupChange(element) {
 		selector = "#" + element.id;
 	} else if (!!element.className) {
 		selector = element.nodeName + "." + element.className;
-	}else{
+	} else {
 		selector = "*";
 	}
 
@@ -1531,25 +1653,6 @@ function craftAndSell() {
 	});
 }
 
-function setupLoop(callback) {
-	rwkState = getRWKState();
-	setTimeout(function () {
-		checkInterrupts(callback)()
-		.catch(function (error) {
-			console.log(error);
-			throw (error);
-		}).then(function () {
-			if (!done) {
-				setupLoop(callback);
-			}
-		}, function () {
-			if (!done) {
-				setupLoop(callback);
-			}
-		});
-	}, getLoopDelayValue());
-}
-
 //logic branching
 
 function getApexStatus() {
@@ -1576,51 +1679,8 @@ function isTrivial(text) {
 }
 
 function craftingFailed() {
-	return getResponseMessage()
+	return viewModel.getResponseMessage()
 	.indexOf("failed") > -1;
-}
-
-function checkInterrupts(callback) {
-	var returnMe;
-	if (rwkState.isSecurityResponseNeeded) {
-		done = true;
-		grindButton.onclick = startGrindingHandler;
-		grindButton.textContent = "Grind";
-		craftButton.onclick = startGrindingHandler;
-		craftButton.textContent = "Craft";
-
-		makeNoise();
-
-		return new Promise(function (resolve, reject) {
-			reject();
-		});
-		// alert("security");
-	}
-	//if dead revive
-	else if (rwkState.isReviveNeeded) {
-		returnMe = function () {
-			setTimeout(function () {
-				return revive();
-			}, reviveDelay);
-		};
-	}
-	//if level up buttons
-	else if (rwkState.isTrainingNeeded) {
-		returnMe = actions.train;
-	} else if (rwkState.isBeastActive && getBeastPosition().plane === "Sur") {
-		done = true;
-		grindButton.onclick = startGrindingHandler;
-		grindButton.textContent = "Grind";
-		craftButton.onclick = startGrindingHandler;
-		craftButton.textContent = "Craft";
-		makeNoise();
-		returnMe = beastHandler;
-	} else if (rwkState.isInventoryFull) {
-		returnMe = actions.destroyItem;
-	} else {
-		returnMe = callback;
-	}
-	return returnMe;
 }
 
 function makeNoise() {
@@ -1744,7 +1804,7 @@ setTimeout(function () {
 		if (classIndex > -1) {
 			this.className = this.className.slice(0, classIndex - 1) + this.className.slice(classIndex + className.length);
 		} else {
-			this.className += className;
+			this.className += className;A
 		}
 	};
 
@@ -1752,6 +1812,6 @@ setTimeout(function () {
 	// you can add the style sheet if you are on PC
 	// AddStyleSheet(cssString);
 	// otherwise, if using a mobile browser or TamperMonkey, use this
-	// setStyleAttributes();
+	uiSetup.setStyleAttributes();
 
 }, 5000);
