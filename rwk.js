@@ -361,11 +361,7 @@ var UISetup = (function () {
 			}
 			//if dead revive
 			else if (rwkState.isReviveNeeded) {
-				returnMe = function () {
-					setTimeout(function () {
-						return actions.revive();
-					}, reviveDelay);
-				};
+				returnMe = actions.revive;
 			}
 			//if level up buttons
 			else if (rwkState.isTrainingNeeded) {
@@ -426,7 +422,7 @@ var UISetup = (function () {
 		}
 		function cancelTravelHandler() {
 			cancelMove = true;
-			var button = getElement("#btnTravel");
+			var button = viewModel.getTravelButton();
 			button.onclick = moveHandler;
 			button.textContent = "Travel";
 		}
@@ -651,12 +647,17 @@ var UISetup = (function () {
 				actionTable.style = "";
 				actionTable.style.height = "30em";
 				actionTable.style.width = "15em";
-				viewModel.getPlayerTable().querySelectorAll("td[width]").forEach(function (x) {
-					x.setAttribute("width", "");
-				});
-				viewModel.getKingdomTable().querySelectorAll("td[width]").forEach(function (x) {
-					x.setAttribute("width", "");
-				});
+				
+				actionTable.querySelectorAll("tr:nth-child(1),tr:nth-child(2),tr:nth-child(4),tr:nth-child(5),tr:nth-child(6),tr:nth-child(8),tr:nth-child(9),tr:nth-child(12)")
+				.forEach(function(x) {x.style.display = "none";});
+				actionTable.querySelectorAll("tr:nth-child(3),tr:nth-child(7),tr:nth-child(10),tr:nth-child(11)")
+				.forEach(function(x) {x.style.height = "0";});
+				
+				viewModel.getPlayerTable().style.display = "none";
+				viewModel.getKingdomTable().style.display = "none";
+				
+				
+				
 				viewModel.getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
 				.forEach(function (x) {
 					x.style.width = "10em";
@@ -685,7 +686,15 @@ var UISetup = (function () {
 					x.style.width = "10em";
 				});
 				viewModel.getKingdomTable().className += " hideDetails";
-				viewModel.getMainFrameElements("td[background]",  + ",body > table > tbody > tr:nth-child(1)",  + ",body > table > tbody > tr:nth-child(1) > td:nth-child(1)",  + ",body > table > tbody > tr:nth-child(2)",  + ",body > table > tbody > tr:nth-child(2) > td > table",  + ",body > table > tbody > tr:nth-child(2) > td > center",  + ",body > table > tbody > tr:nth-child(5) > td > table",  + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(1)",  + ",body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(6)",  + "," + viewModel.getActionDelay())
+				viewModel.getMainFrameElements("td[background]",  
+				+ ", body > table > tbody > tr:nth-child(1)",  
+				+ ", body > table > tbody > tr:nth-child(1) > td:nth-child(1)",  
+				+ ", body > table > tbody > tr:nth-child(2)",  
+				+ ", body > table > tbody > tr:nth-child(2) > td > table",  
+				+ ", body > table > tbody > tr:nth-child(2) > td > center",  
+				+ ", body > table > tbody > tr:nth-child(5) > td > table",  
+				+ ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(1)",  
+				+ ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(6)")
 				.forEach(function (x) {
 					x.style.display = "none";
 				});
@@ -875,22 +884,19 @@ var Actions = (function () {
 			console.log("move");
 			return resolveAction(function () {
 				window.frames[0].Move(dir);
-			}, getDelay(newFightDelay * 2), selectors.actionSubmit);
+			}, getDelay(newFightDelay * 2), viewModel.selectors.actionSubmit);
 		}
 		function getNextUnwantedItem() {
-			var select = document.querySelector(viewModel.selectors.target);
-			if (!select) {
-				select = viewModel.getTarget();
-			}
-			var options = select.querySelectorAll("option");
+			console.log("getNextUnwantedItem");
+			var select = viewModel.getTarget();
 
-			for (var i = 0; i < options.length; i++) {
-				var isEquipped = options[i].textContent.indexOf("EQUIPPED") > -1;
-				var isDivider = options[i].textContent.indexOf("_") > -1;
-				var wanted = wantItem(options[i].textContent);
+			for (var i = 0; i < select.options.length; i++) {
+				var isEquipped = select.options[i].textContent.indexOf("EQUIPPED") > -1;
+				var isDivider = select.options[i].textContent.indexOf("_") > -1;
+				var wanted = wantItem(select.options[i].textContent);
 
 				if (!isEquipped && !wanted && !isDivider) {
-					return options[i].value;
+					return select.options[i].value;
 				}
 			}
 
@@ -898,7 +904,7 @@ var Actions = (function () {
 		}
 
 		function wantItem(text) {
-
+			console.log("wantItem", text);
 			if (!text) {
 				text = viewModel.getChatText().join(" ");
 			}
@@ -908,7 +914,7 @@ var Actions = (function () {
 			var wantThese = [
 				"Allegiance",
 				"Angel Hair",
-				"Annulment",
+				// "Annulment",
 				"Apex",
 				"Attacker`s Balance",
 				"Balace Armorcraft Guide",
@@ -916,7 +922,7 @@ var Actions = (function () {
 				"Believer",
 				"Black Ashen Rock",
 				"Captain`s Staff of Valor",
-				"Cara",
+				// "Cara",
 				"Clarity",
 				"Conquest",
 				"Death Spike",
@@ -1052,9 +1058,17 @@ var Actions = (function () {
 		}
 		function revive() {
 			console.log("revive");
-			return resolveAction(function () {
-				parent.frames[0].window.revive();
-			}, getDelay(standardDelay / 2), viewModel.selectors.actionSubmit);
+
+			return new Promise(function (resolve, reject) {
+				setTimeout(function () {
+					resolve();
+				}, getDelay(reviveDelay));
+			})
+			.then(function () {
+				resolveAction(function () {
+					parent.frames[0].window.revive();
+				}, getDelay(standardDelay / 2), viewModel.selectors.actionSubmit);
+			})
 		}
 		function train() {
 			console.log("train");
@@ -1804,7 +1818,7 @@ setTimeout(function () {
 		if (classIndex > -1) {
 			this.className = this.className.slice(0, classIndex - 1) + this.className.slice(classIndex + className.length);
 		} else {
-			this.className += className;A
+			this.className += className;
 		}
 	};
 
