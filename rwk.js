@@ -269,6 +269,17 @@ var ViewModel = (function () {
 			return returnMe;
 		}
 
+		function getOptionValueByText(select, text) {
+			console.log("getOptionValueByText");
+			for (var i = 0; i < select.options.length; i++) {
+				if (select.options[i].textContent === text) {
+					return select.options[i].value;
+				}
+			}
+
+			return null;
+		}
+
 		//// Singleton
 		//// Private methods and variables
 
@@ -322,7 +333,8 @@ var ViewModel = (function () {
 			getUpWindow: getUpWindow,
 			getWalkKingdomsButton: getWalkKingdomsButton,
 			getResponseMessage: getResponseMessage,
-			getChatText: getChatText
+			getChatText: getChatText,
+			getOptionValueByText: getOptionValueByText
 		};
 	}
 
@@ -628,9 +640,13 @@ var UISetup = (function () {
 				updateInfo();
 			},
 			setStyleAttributes: function () {
-				viewModel.getMainFrameElements(".info,#s_Window,.addedDiv")
+				viewModel.getMainFrameElements("#s_Window,.addedDiv")
 				.forEach(function (x) {
 					x.style.display = "inline-block";
+				});
+				viewModel.getMainFrameElements(".info")
+				.forEach(function (x) {
+					x.style.display = "block";
 				});
 				viewModel.getMainFrameElements(".kingdom-info,.player-info")
 				.forEach(function (x) {
@@ -647,17 +663,19 @@ var UISetup = (function () {
 				actionTable.style = "";
 				actionTable.style.height = "30em";
 				actionTable.style.width = "15em";
-				
+
 				actionTable.querySelectorAll("tr:nth-child(1),tr:nth-child(2),tr:nth-child(4),tr:nth-child(5),tr:nth-child(6),tr:nth-child(8),tr:nth-child(9),tr:nth-child(12)")
-				.forEach(function(x) {x.style.display = "none";});
+				.forEach(function (x) {
+					x.style.display = "none";
+				});
 				actionTable.querySelectorAll("tr:nth-child(3),tr:nth-child(7),tr:nth-child(10),tr:nth-child(11)")
-				.forEach(function(x) {x.style.height = "0";});
-				
+				.forEach(function (x) {
+					x.style.height = "0";
+				});
+
 				viewModel.getPlayerTable().style.display = "none";
 				viewModel.getKingdomTable().style.display = "none";
-				
-				
-				
+
 				viewModel.getMainFrameElements(".kingdom-info > div > span,.player-info > div > span")
 				.forEach(function (x) {
 					x.style.width = "10em";
@@ -686,15 +704,15 @@ var UISetup = (function () {
 					x.style.width = "10em";
 				});
 				viewModel.getKingdomTable().className += " hideDetails";
-				viewModel.getMainFrameElements("td[background]",  
-				+ ", body > table > tbody > tr:nth-child(1)",  
-				+ ", body > table > tbody > tr:nth-child(1) > td:nth-child(1)",  
-				+ ", body > table > tbody > tr:nth-child(2)",  
-				+ ", body > table > tbody > tr:nth-child(2) > td > table",  
-				+ ", body > table > tbody > tr:nth-child(2) > td > center",  
-				+ ", body > table > tbody > tr:nth-child(5) > td > table",  
-				+ ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(1)",  
-				+ ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(6)")
+				viewModel.getMainFrameElements("td[background]",
+					 + ", body > table > tbody > tr:nth-child(1)",
+					 + ", body > table > tbody > tr:nth-child(1) > td:nth-child(1)",
+					 + ", body > table > tbody > tr:nth-child(2)",
+					 + ", body > table > tbody > tr:nth-child(2) > td > table",
+					 + ", body > table > tbody > tr:nth-child(2) > td > center",
+					 + ", body > table > tbody > tr:nth-child(5)",
+					 + ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(1)",
+					 + ", body > table > tbody > tr:nth-child(3) > td > table > tbody > tr:nth-child(6)")
 				.forEach(function (x) {
 					x.style.display = "none";
 				});
@@ -1001,10 +1019,14 @@ var Actions = (function () {
 				pollzero(viewModel.getChatForm(), 0);
 			}, getDelay(newFightDelay), viewModel.selectors.actionSubmit);
 		}
-		function submitGeneralAction() {
-			top.frames.main.document.getElementById("skipform").action.value = "fight";
-			top.frames.main.document.getElementById("skipform").target.value = 0;
-			window.frames[0].pollzero(viewModel.getGeneralForm(), 0, true);
+		function submitGeneralAction(action, target, other, othera, otherb) {
+			var form = top.frames.main.document.getElementById("skipform");
+			form.action.value = action;
+			form.target.value = target;
+			form.other.value = other;
+			form.othera.value = othera;
+			form.otherb.value = otherb;
+			window.frames[0].pollzero(form, 0, true);
 		}
 		function submitKingdomAction() {
 			window.frames[0].pollzero(viewModel.getKingForm(), 0, true);
@@ -1084,12 +1106,9 @@ var Actions = (function () {
 				done = true;
 				return Promise.reject();
 			}
-			return selectOptionByValue(viewModel.getTarget(), burnMe, true)
-			.then(function () {
-				return resolveAction(function () {
-					submitGeneralAction();
-				}, getDelay(newFightDelay), viewModel.selectors.response);
-			});
+			return resolveAction(function () {
+				submitGeneralAction("burn", burnMe);
+			}, getDelay(newFightDelay), viewModel.selectors.response);
 		}
 		function cast() {
 			console.log("cast");
@@ -1113,29 +1132,19 @@ var Actions = (function () {
 		}
 		function craft(type, item) {
 			console.log("craft", item);
-			var selectCraftable = viewModel.getCraftQualitySelect();
-			return setAction("Craft")
+			return resolveAction(function () {
+				submitGeneralAction("ts", getOptionValueByText(viewModel.getTarget(), type), getOptionValueByText(viewModel.getOther(), item));
+			}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length), null)
 			.then(function () {
-				return setTarget(type)
-				.then(function () {
-					return setOther(item)
-					.then(function () {
-						return resolveAction(function () {
-							submitGeneralAction();
-						}, (newFightDelay * 2) * (1 + 4 * selectCraftable.selectedIndex / selectCraftable.options.length), null)
-						.then(function () {
-							if (isTrivial()) {
-								selectCraftable.selectedIndex += 1;
-							}
-							if (craftingFailed()) {
-								reject();
-							} else {
-								console.log("resolving craft");
-								resolve();
-							}
-						});
-					});
-				});
+				if (isTrivial()) {
+					viewModel.getCraftQualitySelect().selectedIndex += 1;
+				}
+				if (craftingFailed()) {
+					reject();
+				} else {
+					console.log("resolving craft");
+					resolve();
+				}
 			});
 		}
 		function sell(item) {
@@ -1143,7 +1152,7 @@ var Actions = (function () {
 			setAction("Sell");
 			setTarget(item);
 			return resolveAction(function () {
-				submitGeneralAction();
+				submitGeneralAction("sell", getOptionValueByText(viewModel.getTarget(), type));
 			}, (newFightDelay * 2));
 		}
 		function beastHandler() {
@@ -1157,14 +1166,16 @@ var Actions = (function () {
 		}
 		function findBeast() {
 			console.log("findBeast");
-			setAction("Battle");
 
 			var dirs = [3, 0, 2, 2, 1, 1, 3, 3];
 			var returnMe = null;
 			var promiseChain = new Promise(function (resolve, reject) {
 					if (isBeastHere()) {
+						var beast = creatures.filter(function (x) {
+								return x !== "" && x !== "99999"
+							})[0];
 						resolveAction(function () {
-							submitGeneralAction();
+							submitGeneralAction("battle", beast);
 						}, getDelay(rapidDelay), viewModel.selectors.actionSubmit)
 						.then(function () {
 							console.log("resolving findBeast");
@@ -1178,8 +1189,11 @@ var Actions = (function () {
 			dirs.forEach(function (dir) {
 				promiseChain = promiseChain.then(
 						function () {
+						var beast = creatures.filter(function (x) {
+								return x !== "" && x !== "99999"
+							})[0];
 						return resolveAction(function () {
-							submitGeneralAction();
+							submitGeneralAction("battle", beast);
 						}, getDelay(rapidDelay), viewModel.selectors.actionSubmit);
 					},
 						function () {
@@ -1188,7 +1202,14 @@ var Actions = (function () {
 							move(dir)
 							.then(function () {
 								if (isBeastHere()) {
-									viewModel.getTarget().selectedIndex = 2;
+									// var beast = creatures.filter(function (x) {
+											// return x !== "" && x !== "99999"
+										// })[0];
+
+									// return resolveAction(function () {
+										// submitGeneralAction("battle", beast);
+									// }, getDelay(rapidDelay), viewModel.selectors.actionSubmit);
+
 									console.log("resolving findBeastRejectHandler");
 									resolve();
 								} else {
@@ -1204,50 +1225,54 @@ var Actions = (function () {
 		}
 		function isBeastHere() {
 			console.log("isBeastHere");
-			return getElement(viewModel.getTarget()).querySelectorAll("option").length > 1;
+			return creatures.filter(function (x) {
+				return x !== "" && x !== "99999"
+			}).length > 0;
 		}
 		function teleport(x, y) {
-			setAction("Teleport");
+			// setAction("Teleport");
 
 			return new Promise(function (resolve, reject) {
 
-				waitForDOM(window.frames[0].document, viewModel.selectors.other, null, function () {
+				// waitForDOM(window.frames[0].document, viewModel.selectors.other, null, function () {
 
-					viewModel.getTarget().value = x;
-					viewModel.getOther().value = y;
+					// viewModel.getTarget().value = x;
+					// viewModel.getOther().value = y;
 
 					resolveAction(function () {
-						submitGeneralAction();
+						submitGeneralAction("tele", x, y);
 					}, getDelay(standardDelay), viewModel.selectors.actionSubmit)
 					.then(function () {
-						if (viewModel.getResponseMessage().indexOf("purchase") > -1) {
-							reject();
-						} else {
+						// if (viewModel.getResponseMessage().indexOf("purchase") > -1) {
+							// reject();
+						// } else {
 							console.log("resolving teleport", x, y);
 							resolve();
-						}
+						// }
 					}, function () {
 						console.log("rejecting teleport", x, y);
 						reject();
 					});
-				}, function () {}, null);
+				// }, function () {}, null);
 			});
 		}
 		function buyRune() {
-			setKingdomAction("Runes");
+			// setKingdomAction("Runes");
 
 			return new Promise(function (resolve, reject) {
-				waitForDOM(window.frames[0].document, viewModel.selectors.kingdomOtherA, null, function () {
-					setKingdomOtherA("1");
+				// waitForDOM(window.frames[0].document, viewModel.selectors.kingdomOtherA, null, function () {
+					// setKingdomOtherA("1");
 
 					resolveAction(function () {
-						viewModel.getKingdomActionSubmit().click();
+							submitGeneralAction("rune", "", "", "1", "");
+
+					// viewModel.getKingdomActionSubmit().click();
 					}, getDelay(newFightDelay), viewModel.selectors.actionSubmit)
 					.then(function () {
 						console.log("resolving buy rune");
 						resolve();
 					});
-				}, function () {}, null);
+				// }, function () {}, null);
 			});
 		}
 		function travel(x, y) {
@@ -1277,7 +1302,7 @@ var Actions = (function () {
 				.then(function () {
 					return travel(x, y);
 				}, function () {
-					reject();
+					// reject();
 				});
 			} else {
 				console.log("resolving travel", x, y);
@@ -1312,7 +1337,7 @@ var Actions = (function () {
 					.then(function () {
 						return travel(kd.x, kd.y);
 					}, function () {
-						Promise.reject();
+						return Promise.reject();
 					});
 				promiseChain = promiseChain
 					.then(function () {
@@ -1381,10 +1406,11 @@ var Actions = (function () {
 		}
 		function embezzle() {
 			console.log("embezzle");
-			setKingdomAction("Embezzle");
-			setKingdomOtherA("254000000");
+			// setKingdomAction("Embezzle");
+			// setKingdomOtherA("254000000");
 			return resolveAction(function () {
-				clickKingdomActionSubmit();
+							submitGeneralAction("embezzle", "", "", "254000000", "");
+				// clickKingdomActionSubmit();
 			}, getDelay(newFightDelay), viewModel.selectors.kingdomActionSubmit);
 		}
 
