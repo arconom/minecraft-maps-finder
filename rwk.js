@@ -932,7 +932,7 @@ var Actions = (function () {
 			var wantThese = [
 				"Allegiance",
 				"Angel Hair",
-				// "Annulment",
+				"Annulment",
 				"Apex",
 				"Attacker`s Balance",
 				"Balace Armorcraft Guide",
@@ -1106,10 +1106,12 @@ var Actions = (function () {
 				done = true;
 				return Promise.reject();
 			}
-			return resolveAction(function () {
-				submitGeneralAction("burn", burnMe);
-			}, getDelay(newFightDelay), viewModel.selectors.response);
-		}
+			return selectOptionByValue(viewModel.getTarget(), burnMe, true)
+			.then(function () {
+				return resolveAction(function () {
+					viewModel.getActionSubmit().click();
+				}, getDelay(newFightDelay), viewModel.selectors.response);
+			});		}
 		function cast() {
 			console.log("cast");
 			return this.resolveAction(function () {
@@ -1203,11 +1205,11 @@ var Actions = (function () {
 							.then(function () {
 								if (isBeastHere()) {
 									// var beast = creatures.filter(function (x) {
-											// return x !== "" && x !== "99999"
-										// })[0];
+									// return x !== "" && x !== "99999"
+									// })[0];
 
 									// return resolveAction(function () {
-										// submitGeneralAction("battle", beast);
+									// submitGeneralAction("battle", beast);
 									// }, getDelay(rapidDelay), viewModel.selectors.actionSubmit);
 
 									console.log("resolving findBeastRejectHandler");
@@ -1236,23 +1238,23 @@ var Actions = (function () {
 
 				// waitForDOM(window.frames[0].document, viewModel.selectors.other, null, function () {
 
-					// viewModel.getTarget().value = x;
-					// viewModel.getOther().value = y;
+				// viewModel.getTarget().value = x;
+				// viewModel.getOther().value = y;
 
-					resolveAction(function () {
-						submitGeneralAction("tele", x, y);
-					}, getDelay(standardDelay), viewModel.selectors.actionSubmit)
-					.then(function () {
-						// if (viewModel.getResponseMessage().indexOf("purchase") > -1) {
-							// reject();
-						// } else {
-							console.log("resolving teleport", x, y);
-							resolve();
-						// }
-					}, function () {
-						console.log("rejecting teleport", x, y);
-						reject();
-					});
+				resolveAction(function () {
+					submitGeneralAction("tele", x, y);
+				}, getDelay(standardDelay), viewModel.selectors.actionSubmit)
+				.then(function () {
+					// if (viewModel.getResponseMessage().indexOf("purchase") > -1) {
+					// reject();
+					// } else {
+					console.log("resolving teleport", x, y);
+					resolve();
+					// }
+				}, function () {
+					console.log("rejecting teleport", x, y);
+					reject();
+				});
 				// }, function () {}, null);
 			});
 		}
@@ -1261,17 +1263,17 @@ var Actions = (function () {
 
 			return new Promise(function (resolve, reject) {
 				// waitForDOM(window.frames[0].document, viewModel.selectors.kingdomOtherA, null, function () {
-					// setKingdomOtherA("1");
+				// setKingdomOtherA("1");
 
-					resolveAction(function () {
-							submitGeneralAction("rune", "", "", "1", "");
+				resolveAction(function () {
+					submitGeneralAction("rune", "", "", "1", "");
 
 					// viewModel.getKingdomActionSubmit().click();
-					}, getDelay(newFightDelay), viewModel.selectors.actionSubmit)
-					.then(function () {
-						console.log("resolving buy rune");
-						resolve();
-					});
+				}, getDelay(newFightDelay), viewModel.selectors.actionSubmit)
+				.then(function () {
+					console.log("resolving buy rune");
+					resolve();
+				});
 				// }, function () {}, null);
 			});
 		}
@@ -1409,7 +1411,7 @@ var Actions = (function () {
 			// setKingdomAction("Embezzle");
 			// setKingdomOtherA("254000000");
 			return resolveAction(function () {
-							submitGeneralAction("embezzle", "", "", "254000000", "");
+				submitGeneralAction("embezzle", "", "", "254000000", "");
 				// clickKingdomActionSubmit();
 			}, getDelay(newFightDelay), viewModel.selectors.kingdomActionSubmit);
 		}
