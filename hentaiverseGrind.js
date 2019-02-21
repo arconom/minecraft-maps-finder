@@ -1,3 +1,5 @@
+
+
 NodeList.prototype.forEach = Array.prototype.forEach;
 
 function loop() {
@@ -9,13 +11,13 @@ function loop() {
 function chooseAction() {
 	var prompt = document.querySelector("#btcp");
 	var health = 0;
-	var mana = parseInt(document.querySelector("#pane_vitals #vrm").textContent);
+	var mana = parseInt(document.querySelector("#pane_vitals #vrm").textContent, 10);
 	var monsterCount = document.querySelectorAll("#pane_monster > div[onclick]").length;
 	var tokenCount = document.querySelectorAll("#vcp > div > div").length;
 	var healAvailable = document.querySelector("#qb1[onclick]") == null ? false : true;
 
 	try {
-		health = parseInt(document.querySelector("#pane_vitals #vrhb").textContent);
+		health = parseInt(document.querySelector("#pane_vitals #vrhb").textContent, 10);
 	} catch (e) {
 		health = 0;
 	}
@@ -76,25 +78,25 @@ function groupedMonsters() {
 function getFunction(value) {
 	var mapping = {
 		"attack": function () {
-			document.querySelector(".btm1[onclick]").click()
+			document.querySelector(".btm1[onclick]").click();
 		},
 		"defend": function () {
-			document.querySelector("#ckey_defend").click()
+			document.querySelector("#ckey_defend").click();
 		},
 		"focus": function () {
-			document.querySelector("#ckey_focus").click()
+			document.querySelector("#ckey_focus").click();
 		},
 		"spirit": function () {
-			document.querySelector("#ckey_spirit").click()
+			document.querySelector("#ckey_spirit").click();
 		},
 		"protection": function () {
-			document.querySelector("#qb2").click()
+			document.querySelector("#qb2").click();
 		},
 		"heal": function () {
-			document.querySelector("#qb1").click()
+			document.querySelector("#qb1").click();
 		},
 		"fire": function () {
-			document.querySelector("#qb4").click()
+			document.querySelector("#qb4").click();
 			setTimeout(function () {
 				var n = groupedMonsters();
 				console.log("targeting ", n);
@@ -129,3 +131,5 @@ looper.textContent = "start";
 document.querySelector("#pane_action").appendChild(looper);
 
 looper.click();
+
+
